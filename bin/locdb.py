@@ -41,7 +41,7 @@ def main(args):
             elif args.continent:
                 print(look_for, ": ", continent(name=look_for), sep="")
             elif args.geonames:
-                print(look_for, ": ", geonames(name=look_for), sep="")
+                print(look_for, pprint.pformat(geonames(name=look_for)), sep="\n")
             else:
                 print(look_for, find(name=look_for, like=args.like, handle_replacement=True))
         except LocationNotFound as err:
