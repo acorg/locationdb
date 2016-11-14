@@ -42,27 +42,41 @@ def _lookup(feature, **args):
         else:
             return None
 
-    return _get(feature, make, **args)
+    return _get(feature, make, args)
 
 # ----------------------------------------------------------------------
 
-def _get(feature, result_maker, **args):
-    url = "http://api.geonames.org/{}?username=acorg&type=json&{}".format(feature, urllib.parse.urlencode(args))
-    # module_logger.debug('_lookup {}'.format(url))
-    return [e2 for e2 in (result_maker(e1) for e1 in json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))["geonames"]) if e2]
+def _get(feature, result_maker, args):
+    args.update({"username": "acorg", "type": "json"})
+    url = "http://api.geonames.org/{}?{}".format(feature, urllib.parse.urlencode(args))
+    # module_logger.debug('_lookup {!r}'.format(url))
+    rj = json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))
+    return [e2 for e2 in (result_maker(e1) for e1 in rj["geonames"]) if e2]
 
 # ----------------------------------------------------------------------
 
 def _lookup_chinese(name):
     if len(name) > 3:
-        p
+        province = _find_chinese_province(name)[0]
+        county = _find_chinese_county(name, province);
+        if county:
+            r = [{
+                "local_name": name,
+                "name": _make_chinese_name(province, county),
+                "province": _make_province_name(province),
+                "country": province["countryName"],
+                "latitude": county["lat"],
+                "longitude": county["lng"],
+                }]
+        else:
+            r = []
     else:
         def make(entry):
-            name = _make_province_name(entry)
+            province_name = _make_province_name(entry)
             return {
                 "local_name": name,
-                "name": name,
-                "province": name,
+                "name": province_name,
+                "province": province_name,
                 "country": entry["countryName"],
                 "latitude": entry["lat"],
                 "longitude": entry["lng"],
@@ -74,16 +88,10 @@ def _lookup_chinese(name):
 # ----------------------------------------------------------------------
 
 def _find_chinese_province(name):
-
-    def make(entry):
-        if entry["name"] == name:
-            return entry
-        else:
-            return None
-
-    r = _get("search", result_maker=make, isNameRequired="true", name_startsWith=name[:2], fclass="A", fcode="ADM1", lang="cn")
+    r = _get("search", lambda e: e if e["name"] == name[:2] else None, {"isNameRequired": "true", "name_startsWith": name[:2], "fclass": "A", "fcode": "ADM1", "lang": "cn"})
+    # module_logger.debug('name: {!r} : {!r}'.format(name[:2], r))
     if not r: # Inner Mongolia is written using 3 Hanzi
-        r = _get("search", result_maker=make, isNameRequired="true", name_startsWith=name[:3], fclass="A", fcode="ADM1", lang="cn")
+        r = _get("search", lambda e: e if e["name"] == name[:3] else None, {"isNameRequired": "true", "name_startsWith": name[:3], "fclass": "A", "fcode": "ADM1", "lang": "cn"})
     return r
 
 # ----------------------------------------------------------------------
@@ -94,6 +102,46 @@ def _make_province_name(entry):
     if space_pos >= 0:
         r = r[:space_pos]
     return r;
+
+# ----------------------------------------------------------------------
+
+def _find_chinese_county(full_name, province):
+    name = full_name[len(province["name"]):]
+    r = _get("search", lambda e: e, {"isNameRequired": "true", "name_startsWith": name, "fclass": "A", "fcode": "ADM3", "adminCode1": province["adminCode1"], "lang": "cn"})
+    if not r:
+        r = _get("search", lambda e: e, {"isNameRequired": "true", "name_startsWith": name, "adminCode1": province["adminCode1"], "lang": "cn"})
+    # module_logger.debug('_find_chinese_county {}'.format(r))
+    return r[0] if r else None
+
+# ----------------------------------------------------------------------
+
+def _make_chinese_name(province, county):
+    return _make_province_name(province) + " " + _make_county_name(county)
+
+# ----------------------------------------------------------------------
+
+def _make_county_name(county):
+
+    def remove_suffix(source, suffix):
+        if source[-len(suffix):] == suffix:
+            source = source[:-len(suffix)]
+        return source
+
+    def remove_apostrophe(source):
+        return source.replace("’", "")
+
+    r = county["toponymName"].upper()
+    r1 = remove_suffix(r, " ZIZHIXIAN")
+    if r1 != r:
+        r = remove_suffix(r1, "ZU")
+    else:
+        for s in [" QU", " XIAN", " SHI"]:
+            r2 = remove_suffix(r, s)
+            if r2 != r:
+                r = r2
+                break
+    r = remove_apostrophe(r)
+    return r
 
 # ----------------------------------------------------------------------
 
