@@ -10,11 +10,9 @@ from .utilities import timeit, read_json
 
 # ======================================================================
 
-class LocationNotFound (Exception):
-    ''
+class LocationNotFound (Exception): pass
 
-class CountryNotFound (Exception):
-    ''
+class CountryNotFound (Exception): pass
 
 class LocationReplacement (Exception):
     """Raised when replacement is found."""
@@ -61,10 +59,14 @@ class LocationDb:
 
     def __init__(self):
         with timeit("Loading LocationDb"):
-            dbfile = Path(os.environ["ACMACS_LOCATIONDB"])
-            if not dbfile.exists():
+            self.dbfile = Path(os.environ["ACMACS_LOCATIONDB"])
+            if not self.dbfile.exists():
                 raise RuntimeError("LocationDb file not found (ACMACS_LOCATIONDB={})".format(os.environ.get("ACMACS_LOCATIONDB")))
-            self.data = read_json(dbfile)
+            self.data = read_json(self.dbfile)
+            try:
+                del self.data["_"]
+            except:
+                pass
 
     # "?continents": "[continent]",
     # "?countries": "{country: index in continents}",
@@ -117,6 +119,15 @@ class LocationDb:
 
     def find_like(self, name):
         return [self._make_result(name=n, found=nn, loc=self.data["locations"][nn]) for n, nn in self.data["names"].items() if name in n]
+
+    def country_exists(self, country):
+        return self.data["countries"].get(country) is not None
+
+    def find_by_lat_long(self, lat, long):
+        for n, e in self.data["locations"].items():
+            if abs(e[0] - lat) < 0.01 and abs(e[1] - long) < 0.01:
+                return n
+        return None
 
 # ======================================================================
 

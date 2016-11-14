@@ -11,15 +11,13 @@ if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
-from locationdb import find, find_cdc_abbreviation, country, continent, geonames, LocationNotFound
+from locationdb import find, find_cdc_abbreviation, country, continent, geonames, add, LocationNotFound
 
 # ======================================================================
 
-# list by geonames
-# add from geonames
 # add cdc abbreviation for name
-# add: name, country, division, lat, long - check for lat,long existence
 # add: name for another name
+# add from geonames
 # add replacement
 
 # acmacs:
@@ -32,20 +30,26 @@ from locationdb import find, find_cdc_abbreviation, country, continent, geonames
 def main(args):
     if not os.environ.get("ACMACS_LOCATIONDB"):
         os.environ["ACMACS_LOCATIONDB"] = str(Path(sys.argv[0]).resolve().parents[1].joinpath("data", "locationdb.json.xz"))
-    for look_for in args.look_for:
-        try:
-            if args.cdc_abbreviation:
-                print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
-            elif args.country:
-                print(look_for, ": ", country(name=look_for), sep="")
-            elif args.continent:
-                print(look_for, ": ", continent(name=look_for), sep="")
-            elif args.geonames:
-                print(look_for, pprint.pformat(geonames(name=look_for)), sep="\n")
-            else:
-                print(look_for, find(name=look_for, like=args.like, handle_replacement=True))
-        except LocationNotFound as err:
-            print(look_for, "NOT FOUND", err)
+    if args.add:
+        if len(args.look_for) != 5:
+            module_logger.error('5 arguments required for adding: name country division lat long')
+            return 1
+        add(*args.look_for)
+    else:
+        for look_for in args.look_for:
+            try:
+                if args.cdc_abbreviation:
+                    print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
+                elif args.country:
+                    print(look_for, ": ", country(name=look_for), sep="")
+                elif args.continent:
+                    print(look_for, ": ", continent(name=look_for), sep="")
+                elif args.geonames:
+                    print(look_for, pprint.pformat(geonames(name=look_for)), sep="\n")
+                else:
+                    print(look_for, find(name=look_for, like=args.like, handle_replacement=True))
+            except LocationNotFound as err:
+                print(look_for, "NOT FOUND", err)
 
 # ----------------------------------------------------------------------
 
@@ -60,6 +64,7 @@ try:
     parser.add_argument('--country', action="store_true", dest='country', default=False, help='report just country.')
     parser.add_argument('--continent', action="store_true", dest='continent', default=False, help='report just continent, look for either location name or country.')
     parser.add_argument('-g', '--geonames', action="store_true", dest='geonames', default=False, help='look in the geonames in order to update locationdb.')
+    parser.add_argument('--add', action="store_true", dest='add', default=False, help='adds new entry.')
 
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")
