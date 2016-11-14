@@ -11,12 +11,9 @@ if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
-from locationdb import find, find_cdc_abbreviation, LocationNotFound
+from locationdb import find, find_cdc_abbreviation, country, continent, LocationNotFound
 
 # ======================================================================
-
-# country by name
-# continent by name or country
 
 # list by geonames
 # add from geonames
@@ -39,6 +36,10 @@ def main(args):
         try:
             if args.cdc_abbreviation:
                 print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
+            elif args.country:
+                print(look_for, ": ", country(name=look_for), sep="")
+            elif args.continent:
+                print(look_for, ": ", continent(name=look_for), sep="")
             else:
                 print(look_for, find(name=look_for, like=args.like, handle_replacement=True))
         except LocationNotFound as err:
@@ -54,6 +55,8 @@ try:
     parser.add_argument('look_for', nargs="+", help='locations to look for.')
     parser.add_argument('-l', '--like', action="store_true", dest='like', default=False, help='kinda fuzzy search.')
     parser.add_argument('-c', '--cdc-abbreviation', action="store_true", dest='cdc_abbreviation', default=False, help='find cdc abbreviation.')
+    parser.add_argument('--country', action="store_true", dest='country', default=False, help='report just country.')
+    parser.add_argument('--continent', action="store_true", dest='continent', default=False, help='report just continent, look for either location name or country.')
 
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")

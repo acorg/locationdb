@@ -42,14 +42,18 @@ def find_cdc_abbreviation(cdc_abbreviation):
 def country(name):
     """Returns country by location name. May raise LocationNotFound
     and LocationReplacement"""
-    return find(name).country
+    return location_db().find(name=name)["country"]
 
 # ======================================================================
 
-def continent(name=None, country=None):
+def continent(name=None):
     """Returns continent by either location name or country. May raise
     LocationNotFound and LocationReplacement"""
-    return location_db().find_continent(country=country or globals()['country'](name=name)).continent
+    ldb = location_db()
+    try:
+        return ldb.find_continent(country=name)
+    except LocationNotFound:
+        return ldb.find_continent(country=ldb.find(name=name)["country"])
 
 # ======================================================================
 
@@ -93,6 +97,12 @@ class LocationDb:
 
     def find_cdc_abbreviation(self, cdc_abbreviation):
         return self.find(self.data["cdc_abbreviations"][cdc_abbreviation.upper()])
+
+    def find_continent(self, country):
+        try:
+            return self.data["continents"][self.data["countries"][country]]
+        except:
+            raise LocationNotFound(country)
 
     def _make_result(self, name, found, loc, replacement=None):
         r = {"name": name, "found": found, "latitude": loc[0], "longitude": loc[1], "country": loc[2], "division": loc[3]}

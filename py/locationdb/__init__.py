@@ -3,7 +3,7 @@
 # license.
 # ======================================================================
 
-from .read import find, find_cdc_abbreviation
+from .read import find, find_cdc_abbreviation, country, continent
 from .read import LocationNotFound
 
 # ======================================================================
