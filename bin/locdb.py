@@ -15,9 +15,6 @@ from locationdb import find, find_cdc_abbreviation, country, continent, geonames
 
 # ======================================================================
 
-# add from geonames
-# add replacement
-
 # acmacs:
 # [plot.markings] has_antigens_isolated_in_country(chart, country_to_find, include_reference=False) -> bool : Returns if the passed chart has antigens isolated in the passed country
 # ? continents_to_antigens(chart) -> {name: [indices]} : for the passed chart returns mapping of continents names to sets of antigens indices
@@ -58,11 +55,25 @@ def main(args):
                 elif args.continent:
                     print(look_for, ": ", continent(name=look_for), sep="")
                 elif args.geonames:
-                    print(look_for, pprint.pformat(geonames(name=look_for)), sep="\n")
+                    entries = list(geonames(name=look_for))
+                    max_name = max(len(e["name"]) for e in entries)
+                    max_country = max(len(sCountries.get(e["country"].upper(), e["country"])) for e in entries)
+                    max_division = max(len(e["province"]) for e in entries)
+                    def format_entry(entry):
+                        country = entry["country"].upper()
+                        country = sCountries.get(country, country)
+                        return "--add {name:<{max_name}s} {country:<{max_country}s} {division:<{max_division}s} {lat:>6.2f} {long:>7.2f}".format(name="'{}'".format(entry["name"].upper()), max_name=max_name + 2, country="'{}'".format(country), max_country=max_country + 2, division="'{}'".format(entry["province"].upper()), max_division=max_division + 2, lat=float(entry["latitude"]), long=float(entry["longitude"]))
+                    print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                 else:
                     print(look_for, find(name=look_for, like=args.like, handle_replacement=True))
             except LocationNotFound as err:
                 print(look_for, "NOT FOUND", err)
+
+# ----------------------------------------------------------------------
+
+sCountries = {
+    "UNITED STATES": "UNITED STATES OF AMERICA",
+    }
 
 # ----------------------------------------------------------------------
 
