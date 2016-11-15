@@ -65,7 +65,8 @@ def main(args):
                         return "--add {name:<{max_name}s} {country:<{max_country}s} {division:<{max_division}s} {lat:>6.2f} {long:>7.2f}".format(name="'{}'".format(entry["name"].upper()), max_name=max_name + 2, country="'{}'".format(country), max_country=max_country + 2, division="'{}'".format(entry["province"].upper()), max_division=max_division + 2, lat=float(entry["latitude"]), long=float(entry["longitude"]))
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                 else:
-                    print(look_for, find(name=look_for, like=args.like, handle_replacement=True))
+                    entry = find(name=look_for, like=args.like, handle_replacement=True)
+                    print("look-for:{!r} found:{!r} division:{!r} country:{!r} continent:{!r} lat:{!r} long:{!r}".format(look_for, entry.found, entry.division, entry.country, entry.continent, entry.latitude, entry.longitude))
             except LocationNotFound as err:
                 print(look_for, "NOT FOUND", err)
 

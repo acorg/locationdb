@@ -57,6 +57,14 @@ def continent(name=None):
 
 class LocationDb:
 
+    class LocationEntry (dict):
+
+        def __getattr__(self, name):
+            try:
+                return self[name]
+            except KeyError:
+                raise AttributeError(name)
+
     def __init__(self):
         with timeit("Loading LocationDb"):
             self.dbfile = Path(os.environ["ACMACS_LOCATIONDB"])
@@ -107,7 +115,7 @@ class LocationDb:
             raise LocationNotFound(country)
 
     def _make_result(self, name, found, loc, replacement=None):
-        r = {"name": name, "found": found, "latitude": loc[0], "longitude": loc[1], "country": loc[2], "division": loc[3]}
+        r = self.LocationEntry({"name": name, "found": found, "latitude": loc[0], "longitude": loc[1], "country": loc[2], "division": loc[3]})
         try:
             r["continent"] = self.data["continents"][self.data["countries"][loc[2]]]
         except:
