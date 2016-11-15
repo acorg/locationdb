@@ -11,11 +11,10 @@ if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
-from locationdb import find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, LocationNotFound
+from locationdb import find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, LocationNotFound
 
 # ======================================================================
 
-# add cdc abbreviation for name
 # add: name for another name
 # add from geonames
 # add replacement
@@ -40,6 +39,11 @@ def main(args):
             module_logger.error('2 arguments required for adding cdc abbreviation: name cdc_abbreviation')
             return 1
         add_cdc_abbreviation(*args.look_for)
+    elif args.add_name:
+        if len(args.look_for) != 2:
+            module_logger.error('2 arguments required for adding new name: existing-name new-name')
+            return 1
+        add_new_name(*args.look_for)
     else:
         for look_for in args.look_for:
             try:
@@ -71,6 +75,7 @@ try:
     parser.add_argument('-g', '--geonames', action="store_true", dest='geonames', default=False, help='look in the geonames in order to update locationdb.')
     parser.add_argument('--add', action="store_true", dest='add', default=False, help='adds new entry, args: name country division lat long')
     parser.add_argument('--add-cdc-abbreviation', action="store_true", dest='add_cdc_abbreviation', default=False, help='adds cdc abbreaviation for a name, args: name cdc_abbreviation.')
+    parser.add_argument('--add-name', action="store_true", dest='add_name', default=False, help='adds new name for existing location, args: existing-name new-name.')
 
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(asctime)s: %(message)s")

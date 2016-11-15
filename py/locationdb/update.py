@@ -56,6 +56,25 @@ def add_cdc_abbreviation(name, cdc_abbreviation, save=True):
     if save:
         write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
 
+# ----------------------------------------------------------------------
+
+def add_new_name(name, new_name, save=True):
+    ldb = read.location_db()
+    name = name.upper()
+    try:
+        entry = ldb.find(name=name)
+    except read.LocationNotFound:
+        raise CannotAdd("{!r} is not in the database".format(name))
+    new_name = new_name.upper()
+    try:
+        ldb.find(name=new_name)
+        raise CannotAdd("{!r} already in the database".format(new_name))
+    except read.LocationNotFound:
+        pass
+    ldb.data["names"][new_name] = entry["found"]
+    if save:
+        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+
 # ======================================================================
 ### Local Variables:
 ### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))
