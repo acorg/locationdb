@@ -14,10 +14,10 @@ class CannotAdd (Exception): pass
 
 # ======================================================================
 
-def add(name, country, division, lat, long):
+def add(name, country, division, lat, long, save=True):
     ldb = read.location_db()
+    name = name.upper()
     try:
-        name = name.upper()
         ldb.find(name=name)
         raise CannotAdd("{!r} already in the database".format(name))
     except read.LocationNotFound:
@@ -32,7 +32,29 @@ def add(name, country, division, lat, long):
         raise CannotAdd("Entry with lat/long already exists: {!r}".format(name_lat_long))
     division = division.upper()
     ldb.data["locations"][name] = [lat, long, country, division]
-    write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+    if save:
+        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+
+# ----------------------------------------------------------------------
+
+def add_cdc_abbreviation(name, cdc_abbreviation, save=True):
+    ldb = read.location_db()
+    name = name.upper()
+    try:
+        ldb.find(name=name)
+    except read.LocationNotFound:
+        raise CannotAdd("{!r} is not in the database".format(name))
+    cdc_abbreviation = cdc_abbreviation.upper()
+    if len(cdc_abbreviation) not in [2, 3]:
+        raise CannotAdd("cdc abbreviation to add is too short or too long: {!r}".format(cdc_abbreviation))
+    if ldb.data["cdc_abbreviations"].get(cdc_abbreviation) is not None:
+        raise CannotAdd("cdc abbreviation {!r} already in the database and points to {!r}".format(cdc_abbreviation, ldb.data["cdc_abbreviations"][cdc_abbreviation]))
+    for ca, n in ldb.data["cdc_abbreviations"].items():
+        if n == name:
+            raise CannotAdd("cdc abbreviation {!r} points to the name in te request: {!r}".format(ca, name))
+    ldb.data["cdc_abbreviations"][cdc_abbreviation] = name
+    if save:
+        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
 
 # ======================================================================
 ### Local Variables:
