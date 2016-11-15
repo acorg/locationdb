@@ -75,6 +75,25 @@ def add_new_name(name, new_name, save=True):
     if save:
         write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
 
+# ----------------------------------------------------------------------
+
+def add_replacement(name_to_replace_with, new_name, save=True):
+    ldb = read.location_db()
+    name_to_replace_with = name_to_replace_with.upper()
+    try:
+        ldb.find(name=name_to_replace_with)
+    except read.LocationNotFound:
+        raise CannotAdd("{!r} is not in the database".format(name_to_replace_with))
+    new_name = new_name.upper()
+    try:
+        ldb.find(name=new_name)
+        raise CannotAdd("{!r} already in the database".format(new_name))
+    except read.LocationNotFound:
+        pass
+    ldb.data["replacements"][new_name] = name_to_replace_with
+    if save:
+        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+
 # ======================================================================
 ### Local Variables:
 ### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))

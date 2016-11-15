@@ -6,7 +6,7 @@
 from .read import find, find_cdc_abbreviation, country, continent
 from .read import LocationNotFound
 from .geonames import geonames
-from .update import add, add_cdc_abbreviation, add_new_name
+from .update import add, add_cdc_abbreviation, add_new_name, add_replacement
 
 # ======================================================================
 ### Local Variables:
