@@ -23,20 +23,31 @@ def main(args):
     fix_hanzi_replacements(ldb)
     fix_hanzi_replacements(ldb, report=True)
     add_dash_replacements(ldb)
+    add_dash_replacements(ldb, report=True)
     ldb.save()
 
 # ----------------------------------------------------------------------
 
-def add_dash_replacements(ldb):
+def add_dash_replacements(ldb, report=False):
     chinese_locations = set(loc for loc, entry in ldb.data["locations"].items() if entry[2] == "CHINA")
-    dash_replacements_added = 0
+    new_replacements = {}
+
+    def add(new_name, replacement):
+        nonlocal new_replacements
+        if new_name not in ldb.data["replacements"]:
+            new_replacements[new_name] = replacement
+
     for name in (name for name, loc in ldb.data["names"].items() if loc in chinese_locations):
         if name.count(" ") == 1:
-            new_name = name.replace(" ", "-")
-            if new_name not in ldb.data["replacements"]:
-                ldb.data["replacements"][new_name] = name
-                dash_replacements_added += 1
-    module_logger.info('dash_replacements_added {}'.format(dash_replacements_added))
+            add(name.replace(" ", "-"), name)
+    for name, replacement in ((name, replacement) for name, replacement in ldb.data["replacements"].items() if ldb.data["names"][replacement] in chinese_locations):
+        if name.count(" ") == 1:
+            add(name.replace(" ", "-"), replacement)
+    ldb.data["replacements"].update(new_replacements)
+    module_logger.info('dash_replacements_added {}'.format(len(new_replacements)))
+    if report and new_replacements:
+        pprint.pprint(new_replacements)
+        raise RuntimeError("New replacements in the second pass")
 
 # ----------------------------------------------------------------------
 
