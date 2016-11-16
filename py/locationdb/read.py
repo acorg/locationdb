@@ -104,6 +104,7 @@ class LocationDb:
                 r = self.find_like(name)
             else:
                 raise LocationNotFound(name)
+        module_logger.debug('locationdb find  --> {}'.format(r))
         return r
 
     def find_cdc_abbreviation(self, cdc_abbreviation):
