@@ -67,7 +67,10 @@ def main(args):
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                 else:
                     entry = find(name=look_for, like=args.like, handle_replacement=True)
-                    print("look-for:{!r} found:{!r} {}division:{!r} country:{!r} continent:{!r} lat:{!r} long:{!r}".format(look_for, entry.found, "replacement:{!r} ".format(entry["replacement"]) if entry.get("replacement") else "", entry.division, entry.country, entry.continent, entry.latitude, entry.longitude))
+                    if not isinstance(entry, list):
+                        entry = [entry]
+                    for e in entry:
+                        print("look-for:{!r} found:{!r} {}division:{!r} country:{!r} continent:{!r} lat:{!r} long:{!r}".format(look_for, e.found, "replacement:{!r} ".format(e["replacement"]) if e.get("replacement") else "", e.division, e.country, e.continent, e.latitude, e.longitude))
             except LocationNotFound as err:
                 print(look_for, "NOT FOUND", err)
 
