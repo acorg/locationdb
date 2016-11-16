@@ -191,7 +191,9 @@ def location_db():
     if sLocationDb is None:
         if not os.environ.get("ACMACS_LOCATIONDB"):
             if os.environ.get("ACMACS_ROOT"):
-                os.environ["ACMACS_LOCATIONDB"] = os.environ["ACMACS_ROOT"] + "/modules/locationdb/data/locationdb.json.xz"
+                locdb = os.environ["ACMACS_ROOT"] + "/modules/locationdb/data/locationdb.json.xz"
+                if Path(locdb).exists():
+                    os.environ["ACMACS_LOCATIONDB"] = locdb
         try:
             sLocationDb = LocationDb()
         except Exception as err:
