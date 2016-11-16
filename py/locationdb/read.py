@@ -26,7 +26,7 @@ class LocationReplacement (Exception):
 
 # ======================================================================
 
-def find(name, like=False, return_found_name=True, handle_replacement=False):
+def find(name, like=False, handle_replacement=False):
     """May raise LocationNotFound and LocationReplacement"""
     return location_db().find(name=name, like=like, handle_replacement=handle_replacement)
 
@@ -141,11 +141,9 @@ class LocationDb:
 
 class LocationDbNotFound:
 
-    def find(self, name, like=False, return_found_name=False, **kwargs):
+    def find(self, name, like=False, **kwargs):
         module_logger.warning('Trying to find location {!r} in LocationDbNotFound'.format(name))
-        if return_found_name:
-            raise LocationNotFound('LocationDb not available')
-        return None
+        raise LocationNotFound('LocationDb not available')
 
 # ======================================================================
 
