@@ -84,9 +84,12 @@ class LocationDb:
     # "?replacements": "{name: name in names}",
 
     def find(self, name, like=False, handle_replacement=False):
-        module_logger.debug('locationdb find {}'.format(name))
         name = name.upper()
-        replacement = None
+        ns = name.strip()
+        if ns != name:
+            name = replacement = ns
+        else:
+            replacement = None
         try:
             n = self.data["names"][name]
         except KeyError:
@@ -104,7 +107,6 @@ class LocationDb:
                 r = self.find_like(name)
             else:
                 raise LocationNotFound(name)
-        module_logger.debug('locationdb find  --> {}'.format(r))
         return r
 
     def find_cdc_abbreviation(self, cdc_abbreviation):
