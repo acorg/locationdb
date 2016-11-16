@@ -84,6 +84,7 @@ class LocationDb:
     # "?replacements": "{name: name in names}",
 
     def find(self, name, like=False, handle_replacement=False):
+        module_logger.debug('locationdb find {}'.format(name))
         name = name.upper()
         replacement = None
         try:

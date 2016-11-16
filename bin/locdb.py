@@ -41,10 +41,11 @@ def main(args):
             return 1
         add_new_name(*args.look_for)
     elif args.add_replacement:
-        if len(args.look_for) != 2:
-            module_logger.error('2 arguments required for adding replacement: existing-name-to-replace-with new-name')
+        if len(args.look_for) < 2 or (len(args.look_for) % 2) != 0:
+            module_logger.error('Even arguments required for adding replacement: existing-name-to-replace-with new-name')
             return 1
-        add_replacement(*args.look_for)
+        for a_no in range(0, len(args.look_for), 2):
+            add_replacement(args.look_for[a_no], args.look_for[a_no+1])
     else:
         for look_for in args.look_for:
             try:

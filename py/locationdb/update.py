@@ -89,6 +89,8 @@ def add_replacement(name_to_replace_with, new_name, save=True):
         raise CannotAdd("{!r} already in the database".format(new_name))
     except read.LocationNotFound:
         pass
+    except read.LocationReplacement:
+        raise CannotAdd("{!r} already in the database".format(new_name))
     ldb.data["replacements"][new_name] = name_to_replace_with
     if save:
         ldb.save()
