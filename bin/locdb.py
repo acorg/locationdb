@@ -56,9 +56,9 @@ def main(args):
                     print(look_for, ": ", continent(name=look_for), sep="")
                 elif args.geonames:
                     entries = list(geonames(name=look_for))
-                    max_name = max(len(e["name"]) for e in entries)
-                    max_country = max(len(sCountries.get(e["country"].upper(), e["country"])) for e in entries)
-                    max_division = max(len(e["province"]) for e in entries)
+                    max_name = max((len(e["name"]) for e in entries), default=1)
+                    max_country = max((len(sCountries.get(e["country"].upper(), e["country"])) for e in entries), default=1)
+                    max_division = max((len(e["province"]) for e in entries), default=1)
                     def format_entry(entry):
                         country = entry["country"].upper()
                         country = sCountries.get(country, country)
