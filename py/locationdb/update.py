@@ -31,6 +31,7 @@ def add(name, country, division, lat, long, save=True):
         raise CannotAdd("Entry with lat/long already exists: {!r}".format(name_lat_long))
     division = division.upper()
     ldb.data["locations"][name] = [lat, long, country, division]
+    ldb.updated()
     if save:
         ldb.save()
 
@@ -52,6 +53,7 @@ def add_cdc_abbreviation(name, cdc_abbreviation, save=True):
         if n == name:
             raise CannotAdd("cdc abbreviation {!r} points to the name in te request: {!r}".format(ca, name))
     ldb.data["cdc_abbreviations"][cdc_abbreviation] = name
+    ldb.updated()
     if save:
         ldb.save()
 
@@ -71,6 +73,7 @@ def add_new_name(name, new_name, save=True):
     except read.LocationNotFound:
         pass
     ldb.data["names"][new_name] = entry["found"]
+    ldb.updated()
     if save:
         ldb.save()
 
@@ -92,6 +95,7 @@ def add_replacement(name_to_replace_with, new_name, save=True):
     except read.LocationReplacement:
         raise CannotAdd("{!r} already in the database".format(new_name))
     ldb.data["replacements"][new_name] = name_to_replace_with
+    ldb.updated()
     if save:
         ldb.save()
 

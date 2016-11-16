@@ -3,7 +3,7 @@
 # license.
 # ======================================================================
 
-import os
+import os, datetime
 from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
 from .utilities import timeit, read_json, write_json
@@ -80,6 +80,7 @@ class LocationDb:
                 del self.data["_"]
             except:
                 pass
+            self._updated = False
 
     # "?continents": "[continent]",
     # "?countries": "{country: index in continents}",
@@ -158,8 +159,17 @@ class LocationDb:
                 return n
         return None
 
+    def version(self):
+        return self.data["  version"] + "-" + self.data[" date"]
+
+    def updated(self):
+        self.data[" date"] = datetime.date.today().strftime("%Y-%m-%d")
+        self._updated = True
+
     def save(self):
-        write_json(self.dbfile, self.data, indent=1, sort_keys=True, backup=True)
+        if self._updated:
+            write_json(self.dbfile, self.data, indent=1, sort_keys=True, backup=True)
+            self._updated = False
 
 # ======================================================================
 

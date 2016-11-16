@@ -16,7 +16,6 @@ from locationdb import find, find_cdc_abbreviation, country, continent, geonames
 # ======================================================================
 
 # acmacs:
-# [plot.markings] has_antigens_isolated_in_country(chart, country_to_find, include_reference=False) -> bool : Returns if the passed chart has antigens isolated in the passed country
 # ? continents_to_antigens(chart) -> {name: [indices]} : for the passed chart returns mapping of continents names to sets of antigens indices
 # ? has_antigens_isolated_in_continent(chart, continent_to_find) -> bool : Returns if the passed chart has antigens isolated in the passed continent
 
