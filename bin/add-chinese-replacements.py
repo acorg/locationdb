@@ -21,6 +21,7 @@ def main(args):
         os.environ["ACMACS_LOCATIONDB"] = str(Path(sys.argv[0]).resolve().parents[1].joinpath("data", "locationdb.json.xz"))
     ldb = read.location_db()
     fix_hanzi_replacements(ldb)
+    fix_hanzi_replacements(ldb, report=True)
     add_dash_replacements(ldb)
     ldb.save()
 
@@ -39,7 +40,7 @@ def add_dash_replacements(ldb):
 
 # ----------------------------------------------------------------------
 
-def fix_hanzi_replacements(ldb):
+def fix_hanzi_replacements(ldb, report=False):
     # old locations database has province-prefecture-county replacement for hanzi name
     # we now use province-county replacement that correspond to what they use in China
     names = ldb.data["names"]
@@ -58,13 +59,21 @@ def fix_hanzi_replacements(ldb):
 
     for name, replacement in ldb.data["replacements"].items():
         if is_chinese(name):
-            if replacement.count(" ") == 2:
+            if replacement.startswith("NEI MONGOL"):
+                if replacement.count(" ") == 3:
+                    _remove_field(2, name, replacement)
+            elif replacement.count(" ") == 2:
                 _remove_field(1, name, replacement)
-            elif replacement.startswith("NEI MONGOL") and replacement.count(" ") == 3:
-                _remove_field(2, name, replacement)
             # elif replacement.count(" ") > 2:
             #     module_logger.info('long {!r}'.format(replacement))
+
+    names.update(new_names)
+    ldb.data["replacements"].update(new_replacements)
     module_logger.info('hanzi_replacements_added: {}  names added: {}'.format(len(new_replacements), len(new_names)))
+    if report and (new_names or new_replacements):
+        pprint.pprint(new_names)
+        pprint.pprint(new_replacements)
+        raise RuntimeError("New replacements in the second pass")
 
 # ======================================================================
 
