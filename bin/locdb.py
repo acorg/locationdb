@@ -11,7 +11,7 @@ if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
 sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
-from locationdb import find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, add_replacement, LocationNotFound
+from locationdb import find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, add_replacement, find_cdc_abbreviation_for_name, LocationNotFound
 
 # ======================================================================
 
@@ -51,6 +51,8 @@ def main(args):
             try:
                 if args.cdc_abbreviation:
                     print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
+                elif args.cdc_abbreviation_for_name:
+                    print(look_for, find_cdc_abbreviation_for_name(look_for))
                 elif args.country:
                     print(look_for, ": ", country(name=look_for), sep="")
                 elif args.continent:
@@ -90,6 +92,7 @@ try:
     parser.add_argument('look_for', nargs="+", help='locations to look for.')
     parser.add_argument('-l', '--like', action="store_true", dest='like', default=False, help='kinda fuzzy search.')
     parser.add_argument('-c', '--cdc-abbreviation', action="store_true", dest='cdc_abbreviation', default=False, help='find cdc abbreviation.')
+    parser.add_argument('--cdc-abbreviation-for-name', action="store_true", dest='cdc_abbreviation_for_name', default=False, help='find cdc abbreviation for given name.')
     parser.add_argument('--country', action="store_true", dest='country', default=False, help='report just country.')
     parser.add_argument('--continent', action="store_true", dest='continent', default=False, help='report just continent, look for either location name or country.')
     parser.add_argument('-g', '--geonames', action="store_true", dest='geonames', default=False, help='look in the geonames in order to update locationdb.')

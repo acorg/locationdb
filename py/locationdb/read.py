@@ -37,6 +37,11 @@ def find_cdc_abbreviation(cdc_abbreviation):
 
 # ======================================================================
 
+def find_cdc_abbreviation_for_name(name):
+    return location_db().find_cdc_abbreviation_for_name(name)
+
+# ======================================================================
+
 def country(name):
     """Returns country by location name. May raise LocationNotFound
     and LocationReplacement"""
@@ -80,7 +85,7 @@ class LocationDb:
     # "?countries": "{country: index in continents}",
     # "?locations": "{name: [latitude, longitude, country, division]}",
     # "?names": "{name: name in locations}",
-    # "?cdc_abbreviation": "{cdc_abbreviation: name in locations}",
+    # "?cdc_abbreviations": "{cdc_abbreviation: name in locations}",
     # "?replacements": "{name: name in names}",
 
     def find(self, name, like=False, handle_replacement=False):
@@ -111,6 +116,18 @@ class LocationDb:
 
     def find_cdc_abbreviation(self, cdc_abbreviation):
         return self.find(self.data["cdc_abbreviations"][cdc_abbreviation.upper()])
+
+    def find_cdc_abbreviation_for_name(self, name):
+        abbr = None
+        try:
+            location_name = self.find(name)["found"]
+            for ca, loc in self.data["cdc_abbreviations"].items():
+                if loc == location_name:
+                    abbr = ca
+                    break
+        except LocationNotFound:
+            pass
+        return abbr
 
     def find_continent(self, country):
         try:
