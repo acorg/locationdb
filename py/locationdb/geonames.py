@@ -7,19 +7,15 @@
 [GeoNames Search Webservice API](http://www.geonames.org/export/geonames-search.html)
 """
 
-import urllib.request, json
-import logging; module_logger = logging.getLogger(__name__)
-
-# ======================================================================
-
-import os
+import os, urllib.request, json
 from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
+from .utilities import is_chinese
 
 # ======================================================================
 
 def geonames(name):
-    if _is_chinese(name):
+    if is_chinese(name):
         r = _lookup_chinese(name=name)
     else:
         r = _lookup("search", isNameRequired="true", name=name)
@@ -142,12 +138,6 @@ def _make_county_name(county):
                 break
     r = remove_apostrophe(r)
     return r
-
-# ----------------------------------------------------------------------
-
-def _is_chinese(name):
-    first = ord(name[0])
-    return first >= 0x3400 and first <= 0x9FFFF;
 
 # ======================================================================
 ### Local Variables:

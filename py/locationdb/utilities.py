@@ -84,6 +84,12 @@ def backup_file(filename):
         except Exception as err:
             module_logger.warning('Cannot create backup copy of {}: {}'.format(filename, err), exc_info=True)
 
+# ----------------------------------------------------------------------
+
+def is_chinese(name):
+    first = ord(name[0])
+    return first >= 0x3400 and first <= 0x9FFFF;
+
 # ======================================================================
 ### Local Variables:
 ### eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))

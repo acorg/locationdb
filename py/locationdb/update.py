@@ -6,7 +6,6 @@
 import os
 import logging; module_logger = logging.getLogger(__name__)
 from . import read
-from .utilities import backup_file, write_json
 
 # ----------------------------------------------------------------------
 
@@ -33,7 +32,7 @@ def add(name, country, division, lat, long, save=True):
     division = division.upper()
     ldb.data["locations"][name] = [lat, long, country, division]
     if save:
-        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+        ldb.save()
 
 # ----------------------------------------------------------------------
 
@@ -54,7 +53,7 @@ def add_cdc_abbreviation(name, cdc_abbreviation, save=True):
             raise CannotAdd("cdc abbreviation {!r} points to the name in te request: {!r}".format(ca, name))
     ldb.data["cdc_abbreviations"][cdc_abbreviation] = name
     if save:
-        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+        ldb.save()
 
 # ----------------------------------------------------------------------
 
@@ -73,7 +72,7 @@ def add_new_name(name, new_name, save=True):
         pass
     ldb.data["names"][new_name] = entry["found"]
     if save:
-        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+        ldb.save()
 
 # ----------------------------------------------------------------------
 
@@ -92,7 +91,7 @@ def add_replacement(name_to_replace_with, new_name, save=True):
         pass
     ldb.data["replacements"][new_name] = name_to_replace_with
     if save:
-        write_json(ldb.dbfile, ldb.data, indent=1, sort_keys=True, backup=True)
+        ldb.save()
 
 # ======================================================================
 ### Local Variables:

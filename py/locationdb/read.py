@@ -6,7 +6,7 @@
 import os
 from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
-from .utilities import timeit, read_json
+from .utilities import timeit, read_json, write_json
 
 # ======================================================================
 
@@ -136,6 +136,9 @@ class LocationDb:
             if abs(e[0] - lat) < 0.01 and abs(e[1] - long) < 0.01:
                 return n
         return None
+
+    def save(self):
+        write_json(self.dbfile, self.data, indent=1, sort_keys=True, backup=True)
 
 # ======================================================================
 
