@@ -154,6 +154,9 @@ sLocationDb = None  # singleton
 def location_db():
     global sLocationDb
     if sLocationDb is None:
+        if not os.environ.get("ACMACS_LOCATIONDB"):
+            if os.environ.get("ACMACS_ROOT"):
+                os.environ["ACMACS_LOCATIONDB"] = os.environ["ACMACS_ROOT"] + "/modules/locationdb/data/locationdb.json.xz"
         try:
             sLocationDb = LocationDb()
         except Exception as err:
