@@ -116,7 +116,10 @@ class LocationDb:
         return r
 
     def find_cdc_abbreviation(self, cdc_abbreviation):
-        return self.find(self.data["cdc_abbreviations"][cdc_abbreviation.upper()])
+        try:
+            return self.find(self.data["cdc_abbreviations"][cdc_abbreviation.upper()])
+        except KeyError:
+            raise LocationNotFound(cdc_abbreviation)
 
     def find_cdc_abbreviation_for_name(self, name):
         abbr = None
