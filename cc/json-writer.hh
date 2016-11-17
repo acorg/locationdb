@@ -8,7 +8,7 @@
 #include "rapidjson/error/en.h"
 #include "rapidjson/stringbuffer.h"
 
-#include "json-keys.hh"
+// #include "json-keys.hh"
 
 // ----------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writ
 template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, _EndObject) { writer.EndObject(); return writer; }
 
 // template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, char key) { writer.Key(&key, 1, false); return writer; }
-template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, JsonKey key) { const char k = static_cast<char>(key); writer.Key(&k, 1, false); return writer; }
+// template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, JsonKey key) { const char k = static_cast<char>(key); writer.Key(&k, 1, false); return writer; }
 template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, std::string s) { writer.String(s.c_str(), static_cast<unsigned>(s.size())); return writer; }
 template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, int value) { writer.Int(value); return writer; }
 
@@ -70,24 +70,24 @@ template <typename RW> inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writ
 
 // ----------------------------------------------------------------------
 
-template <typename Value> class _if_not_empty
-{
- public:
-    inline _if_not_empty(JsonKey key, Value value) : mKey(key), mValue(value) {}
+// template <typename Value> class _if_not_empty
+// {
+//  public:
+//     inline _if_not_empty(JsonKey key, Value value) : mKey(key), mValue(value) {}
 
-    template <typename RW> friend inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, const _if_not_empty<Value>& data)
-        {
-            if (!data.mValue.empty())
-                writer << data.mKey << data.mValue;
-            return writer;
-        }
+//     template <typename RW> friend inline JsonWriterT<RW>& operator <<(JsonWriterT<RW>& writer, const _if_not_empty<Value>& data)
+//         {
+//             if (!data.mValue.empty())
+//                 writer << data.mKey << data.mValue;
+//             return writer;
+//         }
 
- private:
-    JsonKey mKey;
-    Value mValue;
-};
+//  private:
+//     JsonKey mKey;
+//     Value mValue;
+// };
 
-template <typename Value> _if_not_empty<Value> if_not_empty(JsonKey key, Value value) { return _if_not_empty<Value>(key, value); }
+// template <typename Value> _if_not_empty<Value> if_not_empty(JsonKey key, Value value) { return _if_not_empty<Value>(key, value); }
 
 // ----------------------------------------------------------------------
 

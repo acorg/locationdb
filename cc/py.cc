@@ -36,6 +36,8 @@ PYBIND11_PLUGIN(locationdb_backend)
 
     py::class_<LocDb>(m, "LocDb")
             .def(py::init<>())
+            .def("export_to", &LocDb::exportTo, py::arg("filename"), py::arg("pretty") = false)
+            .def("import_from", &LocDb::importFrom, py::arg("filename"))
             ;
 
       // ----------------------------------------------------------------------

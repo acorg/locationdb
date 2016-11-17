@@ -64,6 +64,10 @@ class Replacements : public std::vector<std::pair<std::string, std::string>>
 class LocDb
 {
  public:
+    inline LocDb() = default;
+
+    void importFrom(std::string aFilename);
+    void exportTo(std::string aFilename, bool aPretty) const;
 
  private:
     std::string mDate;
