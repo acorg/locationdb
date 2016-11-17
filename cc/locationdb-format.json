@@ -20,9 +20,9 @@
   ]
  },
  "names": {
-  "(utf8?) NAME": "NAME in locations"
+  "(utf16?) NAME": "NAME in locations"
  },
  "replacements": {
-  "utf8 NAME": "NAME in names"
+  "utf16 NAME": "NAME in names"
  }
 }
