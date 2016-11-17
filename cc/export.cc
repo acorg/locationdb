@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stack>
 
 #include "rapidjson/reader.h"
 #include "rapidjson/error/en.h"
@@ -25,16 +26,91 @@ void locdb_export_pretty(std::string aFilename, const LocDb& aLocDb)
 // ----------------------------------------------------------------------
 
 class Error : public std::runtime_error { public: using std::runtime_error::runtime_error; };
+class Failure : public std::exception { public: using std::exception::exception; };
+class Pop : public std::exception { public: using std::exception::exception; };
+
+class HandlerBase
+{
+ public:
+    inline HandlerBase(LocDb& aLocDb) : mLocDb(aLocDb) {}
+    virtual ~HandlerBase();
+
+    inline virtual HandlerBase* StartObject() { throw Failure(); }
+    inline virtual HandlerBase* EndObject() { throw Failure(); }
+    inline virtual HandlerBase* StartArray() { throw Failure(); }
+    inline virtual HandlerBase* EndArray() { throw Failure(); }
+    inline virtual HandlerBase* Key(const char* /*str*/, rapidjson::SizeType /*length*/, bool /*copy*/) { throw Failure(); }
+    inline virtual HandlerBase* String(const char* /*str*/, rapidjson::SizeType /*length*/, bool /*copy*/) { throw Failure(); }
+    inline virtual HandlerBase* Double(double /*d*/) { throw Failure(); }
+
+ protected:
+    LocDb& mLocDb;
+};
+
+HandlerBase::~HandlerBase()
+{
+}
+
+// ----------------------------------------------------------------------
+
+class LocDbRootHandler : public HandlerBase
+{
+ public:
+    inline LocDbRootHandler(LocDb& aLocDb) : HandlerBase(aLocDb) {}
+
+};
+
+// ----------------------------------------------------------------------
+
+class DocRootHandler : public HandlerBase
+{
+ public:
+    inline DocRootHandler(LocDb& aLocDb) : HandlerBase(aLocDb) {}
+
+    inline virtual HandlerBase* StartObject() { return new LocDbRootHandler(mLocDb); }
+    inline virtual HandlerBase* EndObject(rapidjson::SizeType /*memberCount*/) { throw Failure(); }
+};
+
+// ----------------------------------------------------------------------
 
 class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, LocDbReaderEventHandler>
 {
  public:
     inline LocDbReaderEventHandler(LocDb& aLocDb)
         : mLocDb(aLocDb)
-        {  }
+        {
+            mHandler.emplace(new DocRootHandler(mLocDb));
+        }
 
-    inline bool StartObject() { return true; }
-    inline bool EndObject(rapidjson::SizeType /*memberCount*/) { return true; }
+    inline bool StartObject()
+        {
+            try {
+                auto new_handler = mHandler.top()->StartObject();
+                if (new_handler)
+                    mHandler.emplace(new_handler);
+            }
+            catch (Failure&) {
+                return false;
+            }
+            return true;
+        }
+
+    inline bool EndObject(rapidjson::SizeType /*memberCount*/)
+        {
+            try {
+                auto new_handler = mHandler.top()->EndObject();
+                if (new_handler)
+                    mHandler.emplace(new_handler);
+            }
+            catch (Pop&) {
+                mHandler.pop();
+            }
+            catch (Failure&) {
+                return false;
+            }
+            return true;
+        }
+
     inline bool StartArray() { return true; }
     inline bool EndArray(rapidjson::SizeType /*elementCount*/) { return true; }
 
@@ -45,7 +121,7 @@ class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::U
         }
 
     inline bool String(const Ch* str, rapidjson::SizeType length, bool /*copy*/) { std::cout << "S: " << std::string(str, length) << std::endl; return true; }
-    bool Double(double /*d*/) { return true; }
+    inline bool Double(double /*d*/) { return true; }
 
     inline bool Bool(bool b) { return false; }
     inline bool Int(int /*i*/) { return false; }
@@ -57,6 +133,7 @@ class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::U
 
  private:
     LocDb& mLocDb;
+    std::stack<std::unique_ptr<HandlerBase>> mHandler;
 
       // ----------------------------------------------------------------------
 
