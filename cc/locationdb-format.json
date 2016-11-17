@@ -1,0 +1,28 @@
+{"_":"-*- js-indent-level: 1 -*-",
+ "  version": "locationdb-v2",
+ " date": "YYYY-MM-DD",
+ "cdc_abbreviations": {
+  "AA": "COUNTRY-OR-STATE"
+ },
+ "continents": [
+  "CONTINENT",
+  "UNKNOWN"
+ ],
+ "countries": {
+  "COUNTRY": index in "continents"
+ },
+ "locations": {
+  "NAME": [
+   latitude (float),
+   longitude (float),
+   "COUNTRY",
+   "DIVISION"
+  ]
+ },
+ "names": {
+  "(utf8?) NAME": "NAME in locations"
+ },
+ "replacements": {
+  "utf8 NAME": "NAME in names"
+ }
+}
