@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------
 
 // abbreviation, name
-    class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
+class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
 {
 };
 
@@ -77,6 +77,8 @@ class LocDb
     Locations mLocations;
     Names mNames;
     Replacements mReplacements;
+
+    friend class LocDbRootHandler;
 };
 
 // ----------------------------------------------------------------------
