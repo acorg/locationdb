@@ -33,6 +33,8 @@ class LocationEntry
 {
  public:
     inline LocationEntry() = default;
+    inline LocationEntry(Latitude aLatitude, Longitude aLongitude, std::string aCountry, std::string aDivision)
+        : mLatitude(aLatitude), mLongitude(aLongitude), mCountry(aCountry), mDivision(aDivision) {}
 
  private:
     Latitude mLatitude;
