@@ -70,8 +70,9 @@ def main(args):
                     entry = find(name=look_for, like=args.like, handle_replacement=True)
                     if not isinstance(entry, list):
                         entry = [entry]
+                    # pprint.pprint(entry, width=120)
                     for e in entry:
-                        print("look-for:{!r} found:{!r} {}division:{!r} country:{!r} continent:{!r} lat:{!r} long:{!r}".format(look_for, e.found, "replacement:{!r} ".format(e["replacement"]) if e.get("replacement") else "", e.division, e.country, e.continent, e.latitude, e.longitude))
+                        print("look-for:{!r} name:{!r} location:{!r} {}division:{!r} country:{!r} continent:{!r} lat:{!r} long:{!r}".format(look_for, e.name, e.found, "replacement:{!r} ".format(e["replacement"]) if e.get("replacement") else "", e.division, e.country, e.continent, e.latitude, e.longitude))
             except LocationNotFound as err:
                 print(look_for, "NOT FOUND", err)
 
