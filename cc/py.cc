@@ -38,6 +38,7 @@ PYBIND11_PLUGIN(locationdb_backend)
             .def(py::init<>())
             .def("export_to", &LocDb::exportTo, py::arg("filename"), py::arg("pretty") = false)
             .def("import_from", &LocDb::importFrom, py::arg("filename"))
+            .def("find_name", &LocDb::find_name, py::arg("name"), py::arg("handle_replacement") = true)
             ;
 
       // ----------------------------------------------------------------------
