@@ -22,6 +22,19 @@ void LocDb::exportTo(std::string aFilename, bool aPretty) const
 
 // ----------------------------------------------------------------------
 
+std::string LocDb::stat() const
+{
+    return "continents:" + std::to_string(mContinents.size())
+            + " countries:" + std::to_string(mCountries.size())
+            + " locations:" + std::to_string(mLocations.size())
+            + " names:" + std::to_string(mNames.size())
+            + " cdc-abbr:" + std::to_string(mCdcAbbreviations.size())
+            + " replacements:" + std::to_string(mReplacements.size());
+
+} // LocDb::stat
+
+// ----------------------------------------------------------------------
+
 std::string LocDb::find_name(std::string aName, bool aHandleReplacement) const
 {
       // name = name.upper()

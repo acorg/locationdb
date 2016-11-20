@@ -74,6 +74,7 @@ class LocDb
     void exportTo(std::string aFilename, bool aPretty) const;
 
     std::string find_name(std::string aName, bool aHandleReplacement=true) const;
+    std::string stat() const;
 
  private:
     std::string mDate;

@@ -41,6 +41,7 @@ class HandlerBase
     inline virtual HandlerBase* EndArray() { throw Pop(); }
     inline virtual HandlerBase* Double(double d) { std::cerr << "Double: " << d << std::endl; throw Failure(); }
     inline virtual HandlerBase* Int(int i) { std::cerr << "Int: " << i << std::endl; throw Failure(); }
+    inline virtual HandlerBase* Uint(unsigned u) { std::cerr << "Uint: " << u << std::endl; throw Failure(); }
 
     inline virtual HandlerBase* Key(const char* str, rapidjson::SizeType length)
         {
@@ -107,7 +108,7 @@ class StringMappingHandler : public HandlerBase
         }
 
  private:
-    std::vector<std::pair<std::string, std::string>> mMapping;
+    std::vector<std::pair<std::string, std::string>>& mMapping;
     bool mStarted;
     std::string mKey;
 
@@ -136,7 +137,7 @@ class ContinentsHandler : public HandlerBase
         }
 
  private:
-    Continents mData;
+    Continents& mData;
     bool mStarted;
 
 }; // class StringMappingHandler
@@ -163,16 +164,16 @@ class CountriesHandler : public HandlerBase
             return nullptr;
         }
 
-    inline virtual HandlerBase* Int(int i)
+    inline virtual HandlerBase* Uint(unsigned u)
         {
             if (mKey.empty())
                 throw Failure();
-            mData.emplace_back(mKey, static_cast<size_t>(i));
+            mData.emplace_back(mKey, u);
             return nullptr;
         }
 
  private:
-    Countries mData;
+    Countries& mData;
     bool mStarted;
     std::string mKey;
 
@@ -254,7 +255,7 @@ class LocationsHandler : public HandlerBase
         }
 
  private:
-    Locations mData;
+    Locations& mData;
     bool mStarted;
     std::string mKey;
     size_t mIndex;
@@ -413,10 +414,10 @@ class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::U
     inline bool Key(const char* str, rapidjson::SizeType length, bool /*copy*/) { return handler(&HandlerBase::Key, str, length); }
     inline bool String(const Ch* str, rapidjson::SizeType length, bool /*copy*/) { return handler(&HandlerBase::String, str, length); }
     inline bool Int(int i) { return handler(&HandlerBase::Int, i); }
+    inline bool Uint(unsigned u) { return handler(&HandlerBase::Uint, u); }
     inline bool Double(double d) { return handler(&HandlerBase::Double, d); }
 
       // inline bool Bool(bool /*b*/) { return false; }
-      // inline bool Uint(unsigned u) { return Int(static_cast<int>(u)); }
       // inline bool Null() { std::cout << "Null()" << std::endl; return false; }
       // inline bool Int64(int64_t i) { std::cout << "Int64(" << i << ")" << std::endl; return false; }
       // inline bool Uint64(uint64_t u) { std::cout << "Uint64(" << u << ")" << std::endl; return false; }
@@ -445,6 +446,7 @@ void locdb_import(std::string buffer, LocDb& aLocDb)
         reader.Parse(ss, handler);
         if (reader.HasParseError())
             throw Error("cannot import locationdb: data parsing failed at pos " + std::to_string(reader.GetErrorOffset()) + ": " +  GetParseError_En(reader.GetParseErrorCode()) + "\n" + buffer.substr(reader.GetErrorOffset(), 50));
+          // std::cout << aLocDb.stat() << std::endl;
         // if (!handler.in_init_state())
         //     throw Error("internal: not in init state on parsing completion");
     }
