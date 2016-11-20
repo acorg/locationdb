@@ -10,6 +10,9 @@
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#pragma GCC diagnostic ignored "-Wundef"
+#pragma GCC diagnostic ignored "-Wdocumentation"
+#pragma GCC diagnostic ignored "-Wcovered-switch-default"
 #endif
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -34,11 +37,15 @@ PYBIND11_PLUGIN(locationdb_backend)
 
       // ----------------------------------------------------------------------
 
+    py::class_<LookupResult>(m, "LookupResult")
+            ;
+
     py::class_<LocDb>(m, "LocDb")
             .def(py::init<>())
             .def("export_to", &LocDb::exportTo, py::arg("filename"), py::arg("pretty") = false)
             .def("import_from", &LocDb::importFrom, py::arg("filename"))
-            .def("find_name", &LocDb::find_name, py::arg("name"), py::arg("handle_replacement") = true)
+            .def("find_name", &LocDb::find_name, py::arg("name"))
+            .def("find", &LocDb::find, py::arg("name"))
             ;
 
       // ----------------------------------------------------------------------

@@ -32,7 +32,7 @@ typedef double Longitude;
 class LocationEntry
 {
  public:
-    inline LocationEntry() = default;
+    inline LocationEntry() : mLatitude(90), mLongitude(0) {}
     inline LocationEntry(Latitude aLatitude, Longitude aLongitude, std::string aCountry, std::string aDivision)
         : mLatitude(aLatitude), mLongitude(aLongitude), mCountry(aCountry), mDivision(aDivision) {}
 
@@ -65,6 +65,28 @@ class Replacements : public std::vector<std::pair<std::string, std::string>>
 
 // ----------------------------------------------------------------------
 
+class LookupResult
+{
+ public:
+    inline LookupResult(const LookupResult&) = default;
+    inline LookupResult(LookupResult&&) = default;
+
+    const std::string look_for;
+    const std::string replacement;
+    const std::string name;           // the same as normalized look_for or replacement
+    const std::string location_name;  // location entry name
+    const LocationEntry& location;
+
+ private:
+    inline LookupResult(std::string a_look_for, std::string a_replacement, std::string a_name, std::string a_location_name, const LocationEntry& a_location)
+        : look_for(a_look_for), replacement(a_replacement), name(a_name), location_name(a_location_name), location(a_location) {}
+    friend class LocDb;
+};
+
+// ----------------------------------------------------------------------
+
+class NotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
+
 class LocDb
 {
  public:
@@ -73,7 +95,8 @@ class LocDb
     void importFrom(std::string aFilename);
     void exportTo(std::string aFilename, bool aPretty) const;
 
-    std::string find_name(std::string aName, bool aHandleReplacement=true) const;
+    LookupResult find(std::string aName) const;
+    std::string find_name(std::string aName) const;
     std::string stat() const;
 
  private:
@@ -92,12 +115,18 @@ class LocDb
 
 template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
 {
+#pragma GCC diagnostic push
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#endif
     static const Value empty;
+#pragma GCC diagnostic pop
     const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
-    if (it != aData.end())
-        std::cerr << aName << "--" << it->first << "--" << it->second << std::endl;
-    else
-        std::cerr << aName << "--" << "END" << "--" << aData.size() << std::endl;
+    // if (it != aData.end())
+    //     std::cerr << aName << "--" << it->first << "--" << it->second << std::endl;
+    // else
+    //     std::cerr << aName << "--" << "END" << "--" << aData.size() << std::endl;
     return it == aData.end() || it->first != aName ? empty : it->second;
 }
 
