@@ -43,9 +43,12 @@ PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 # ----------------------------------------------------------------------
 
 BUILD = build
-DIST = dist
+DIST = $(realpath dist)
 
-all: $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(DIST)/location-db.so
+# Do NOT use name locationdb.so for a non-python library because it will conflict with locationdb python module
+LOCATION_DB_LIB = $(DIST)/location-db.so
+
+all: $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 
 -include $(BUILD)/*.d
 
@@ -55,8 +58,7 @@ $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX): $(patsubst %.cc,$(BUILD)/%.o,
 	g++ -shared $(LDFLAGS) -o $@ $^ $(LOCDB_PY_LDLIBS)
 	@#strip $@
 
-# Do NOT use name locationdb.so for a non-python library because it will conflict with locationdb python module
-$(DIST)/location-db.so: $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
+$(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
 	g++ -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
 
 clean:
