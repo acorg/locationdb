@@ -1,5 +1,7 @@
 #include <iostream>
 #include <stack>
+#include <typeinfo>
+#include <memory>
 
 #include "rapidjson/reader.h"
 #include "rapidjson/error/en.h"

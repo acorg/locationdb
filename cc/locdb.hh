@@ -3,10 +3,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // ----------------------------------------------------------------------
 
-// abbreviation, name
+// Abbreviation, name
 class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
 {
 };
