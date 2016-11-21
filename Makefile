@@ -9,7 +9,8 @@ MAKEFLAGS = -w
 
 # ----------------------------------------------------------------------
 
-LOCDB_SOURCES = py.cc locdb.cc export.cc read-file.cc xz.cc
+LOCDB_SOURCES = locdb.cc export.cc read-file.cc xz.cc
+LOCDB_PY_SOURCES = py.cc $(LOCDB_SOURCES)
 
 # ----------------------------------------------------------------------
 
@@ -33,7 +34,8 @@ OPTIMIZATION = -O3 #-fvisibility=hidden -flto
 PROFILE = # -pg
 CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
 LDFLAGS = $(OPTIMIZATION) $(PROFILE)
-LOCDB_LDLIBS = $$(pkg-config --libs liblzma) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
+LOCDB_LDLIBS = $$(pkg-config --libs liblzma)
+LOCDB_PY_LDLIBS = $(LOCDB_LDLIBS) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
 
 MODULES_INCLUDE = -Imodules/rapidjson/include -Imodules/pybind11/include
 PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
@@ -43,15 +45,19 @@ PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 BUILD = build
 DIST = dist
 
-all: $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX)
+all: $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(DIST)/location-db.so
 
 -include $(BUILD)/*.d
 
 # ----------------------------------------------------------------------
 
-$(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
-	g++ -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
+$(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_PY_SOURCES)) | $(DIST)
+	g++ -shared $(LDFLAGS) -o $@ $^ $(LOCDB_PY_LDLIBS)
 	@#strip $@
+
+# Do NOT use name locationdb.so for a non-python library because it will conflict with locationdb python module
+$(DIST)/location-db.so: $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
+	g++ -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
 
 clean:
 	rm -rf $(DIST) $(BUILD)/*.o $(BUILD)/*.d $(BUILD)/submodules
