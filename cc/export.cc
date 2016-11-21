@@ -11,14 +11,14 @@
 
 // ----------------------------------------------------------------------
 
-void locdb_export(std::string aFilename, const LocDb& aLocDb)
+void locdb_export(std::string /*aFilename*/, const LocDb& /*aLocDb*/)
 {
 
 } // locdb_export
 
 // ----------------------------------------------------------------------
 
-void locdb_export_pretty(std::string aFilename, const LocDb& aLocDb)
+void locdb_export_pretty(std::string /*aFilename*/, const LocDb& /*aLocDb*/)
 {
 
 } // locdb_export_pretty

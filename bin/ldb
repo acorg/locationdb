@@ -20,7 +20,13 @@ def main(args):
     with utilities.timeit("Reading locationdb"):
         ldb.import_from(str(Path(args.path_to_locdb).expanduser()))
     for n in args.look_for:
-        print(n, "-->", ldb.find_name(n))
+        find(ldb, n)
+
+# ----------------------------------------------------------------------
+
+def find(ldb, name):
+    r = ldb.find(name.strip().upper())
+    print("look_for:" + r.look_for, "replacement:".format(r.replacement) if r.replacement else "", "name:" + r.name, "location_name:" + r.location_name, "country:" + r.country, "division:" + r.division, "lat/long: {} {}".format(r.latitude, r.longitude))
 
 # ----------------------------------------------------------------------
 

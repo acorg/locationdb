@@ -37,6 +37,10 @@ class LocationEntry
         : mLatitude(aLatitude), mLongitude(aLongitude), mCountry(aCountry), mDivision(aDivision) {}
 
     inline bool empty() const { return mCountry.empty(); }
+    inline Latitude latitude() const { return mLatitude; }
+    inline Longitude longitude() const { return mLongitude; }
+    inline std::string country() const { return mCountry; }
+    inline std::string division() const { return mDivision; }
 
  private:
     Latitude mLatitude;
@@ -77,6 +81,11 @@ class LookupResult
     const std::string location_name;  // location entry name
     const LocationEntry& location;
 
+    inline Latitude latitude() const { return location.latitude(); }
+    inline Longitude longitude() const { return location.longitude(); }
+    inline std::string country() const { return location.country(); }
+    inline std::string division() const { return location.division(); }
+
  private:
     inline LookupResult(std::string a_look_for, std::string a_replacement, std::string a_name, std::string a_location_name, const LocationEntry& a_location)
         : look_for(a_look_for), replacement(a_replacement), name(a_name), location_name(a_location_name), location(a_location) {}
@@ -85,18 +94,17 @@ class LookupResult
 
 // ----------------------------------------------------------------------
 
-class NotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
-
 class LocDb
 {
  public:
+    class NotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
+
     inline LocDb() = default;
 
     void importFrom(std::string aFilename);
     void exportTo(std::string aFilename, bool aPretty) const;
 
     LookupResult find(std::string aName) const;
-    std::string find_name(std::string aName) const;
     std::string stat() const;
 
  private:
