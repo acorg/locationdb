@@ -43,7 +43,7 @@ PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 # ----------------------------------------------------------------------
 
 BUILD = build
-DIST = $(realpath dist)
+DIST = $(abspath dist)
 
 # Do NOT use name locationdb.so for a non-python library because it will conflict with locationdb python module
 LOCATION_DB_LIB = $(DIST)/location-db.so
