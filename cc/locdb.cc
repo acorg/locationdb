@@ -54,6 +54,16 @@ LookupResult LocDb::find(std::string aName) const
 
 // ----------------------------------------------------------------------
 
+LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
+{
+    const std::string location_name = find_indexed_by_name(mCdcAbbreviations, aAbbreviation);
+    return LookupResult(aAbbreviation, std::string(), aAbbreviation, location_name, find_indexed_by_name(mLocations, location_name));
+
+} // LocDb::find_cdc_abbreviation
+
+// ----------------------------------------------------------------------
+
+
 // ----------------------------------------------------------------------
 /// Local Variables:
 /// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))

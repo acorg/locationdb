@@ -53,6 +53,7 @@ PYBIND11_PLUGIN(locationdb_backend)
             .def("export_to", &LocDb::exportTo, py::arg("filename"), py::arg("pretty") = false)
             .def("import_from", &LocDb::importFrom, py::arg("filename"))
             .def("find", &LocDb::find, py::arg("name"))
+            .def("find_cdc_abbreviation", &LocDb::find_cdc_abbreviation, py::arg("abbreviation"))
             .def("country", &LocDb::country, py::arg("name"))
             .def("continent", &LocDb::continent, py::arg("name"))
             ;

@@ -118,6 +118,7 @@ class LocDb
     void exportTo(std::string aFilename, bool aPretty) const;
 
     LookupResult find(std::string aName) const;
+    LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
     inline std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
 
     inline std::string country(std::string aName) const { return find(aName).country(); }
