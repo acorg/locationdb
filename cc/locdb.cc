@@ -43,9 +43,10 @@ LookupResult LocDb::find(std::string aName) const
     try {
         location_name = find_indexed_by_name(mNames, name);
     }
-    catch (NotFound&) {
+    catch (LocationNotFound&) {
         if (name[0] == '#') {
             name.erase(0, 1);
+            std::cerr << "Look for cdc abbreviation: " << name << std::endl;
             location_name = find_indexed_by_name(mCdcAbbreviations, name);
         }
         else {

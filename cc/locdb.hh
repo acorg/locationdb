@@ -7,7 +7,7 @@
 
 // ----------------------------------------------------------------------
 
-class NotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
+class LocationNotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
 
 // ----------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ template <typename Value> inline const Value& find_indexed_by_name(const std::ve
 {
     const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
     if (it == aData.end() || it->first != aName)
-        throw NotFound(aName);
+        throw LocationNotFound(aName);
     return it->second;
 }
 

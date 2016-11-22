@@ -58,7 +58,7 @@ PYBIND11_PLUGIN(locationdb_backend)
             .def("continent", &LocDb::continent, py::arg("name"))
             ;
 
-    py::register_exception<NotFound>(m, "LocationNotFound");
+    py::register_exception<LocationNotFound>(m, "LocationNotFound");
 
       // ----------------------------------------------------------------------
 
