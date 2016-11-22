@@ -24,6 +24,8 @@ def main(args):
     fix_hanzi_replacements(ldb, report=True)
     add_dash_replacements(ldb)
     add_dash_replacements(ldb, report=True)
+    add_join_replacements(ldb)
+    add_join_replacements(ldb, report=True)
     ldb.save()
 
 # ----------------------------------------------------------------------
@@ -45,6 +47,33 @@ def add_dash_replacements(ldb, report=False):
             add(name.replace(" ", "-"), replacement)
     ldb.data["replacements"].update(new_replacements)
     module_logger.info('dash_replacements_added {}'.format(len(new_replacements)))
+    if new_replacements:
+        ldb.updated()
+    if report and new_replacements:
+        pprint.pprint(new_replacements)
+        raise RuntimeError("New replacements in the second pass")
+
+# ----------------------------------------------------------------------
+
+def add_join_replacements(ldb, report=False):
+    chinese_locations = set(loc for loc, entry in ldb.data["locations"].items() if entry[2] == "CHINA")
+    new_replacements = {}
+
+    def add(new_name, replacement):
+        nonlocal new_replacements
+        if new_name not in ldb.data["replacements"]:
+            new_replacements[new_name] = replacement
+
+    for name in (name for name, loc in ldb.data["names"].items() if loc in chinese_locations):
+        if name.count(" ") == 1:
+            add(name.replace(" ", ""), name)
+    for name, replacement in ((name, replacement) for name, replacement in ldb.data["replacements"].items() if ldb.data["names"][replacement] in chinese_locations):
+        if name.count(" ") == 1:
+            add(name.replace(" ", ""), replacement)
+    ldb.data["replacements"].update(new_replacements)
+    module_logger.info('join_replacements_added {}'.format(len(new_replacements)))
+    if new_replacements:
+        ldb.updated()
     if report and new_replacements:
         pprint.pprint(new_replacements)
         raise RuntimeError("New replacements in the second pass")
@@ -81,6 +110,8 @@ def fix_hanzi_replacements(ldb, report=False):
     names.update(new_names)
     ldb.data["replacements"].update(new_replacements)
     module_logger.info('hanzi_replacements_added: {}  names added: {}'.format(len(new_replacements), len(new_names)))
+    if new_names or new_replacements:
+        ldb.updated()
     if report and (new_names or new_replacements):
         pprint.pprint(new_names)
         pprint.pprint(new_replacements)
