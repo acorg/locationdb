@@ -117,6 +117,7 @@ class LocDb
     void importFrom(std::string aFilename);
     void exportTo(std::string aFilename, bool aPretty) const;
 
+      // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
     inline std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }

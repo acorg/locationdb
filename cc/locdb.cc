@@ -44,9 +44,15 @@ LookupResult LocDb::find(std::string aName) const
         location_name = find_indexed_by_name(mNames, name);
     }
     catch (NotFound&) {
-        replacement = find_indexed_by_name(mReplacements, name);
-        name = replacement;
-        location_name = find_indexed_by_name(mNames, name);
+        if (name[0] == '#') {
+            name.erase(0, 1);
+            location_name = find_indexed_by_name(mCdcAbbreviations, name);
+        }
+        else {
+            replacement = find_indexed_by_name(mReplacements, name);
+            name = replacement;
+            location_name = find_indexed_by_name(mNames, name);
+        }
     }
     return LookupResult(aName, replacement, name, location_name, find_indexed_by_name(mLocations, location_name));
 
@@ -56,6 +62,8 @@ LookupResult LocDb::find(std::string aName) const
 
 LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
 {
+    if (aAbbreviation[0] == '#')
+        aAbbreviation.erase(0, 1);
     const std::string location_name = find_indexed_by_name(mCdcAbbreviations, aAbbreviation);
     return LookupResult(aAbbreviation, std::string(), aAbbreviation, location_name, find_indexed_by_name(mLocations, location_name));
 
