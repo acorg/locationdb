@@ -53,9 +53,11 @@ PYBIND11_PLUGIN(locationdb_backend)
             .def("export_to", &LocDb::exportTo, py::arg("filename"), py::arg("pretty") = false)
             .def("import_from", &LocDb::importFrom, py::arg("filename"))
             .def("find", &LocDb::find, py::arg("name"))
+            .def("country", &LocDb::country, py::arg("name"))
+            .def("continent", &LocDb::continent, py::arg("name"))
             ;
 
-    py::register_exception<LocDb::NotFound>(m, "LocationNotFound");
+    py::register_exception<NotFound>(m, "LocationNotFound");
 
       // ----------------------------------------------------------------------
 

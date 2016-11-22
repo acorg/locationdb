@@ -39,19 +39,20 @@ LookupResult LocDb::find(std::string aName) const
 {
     std::string name = aName;
     std::string replacement;
-    std::string location_name = find_indexed_by_name(mNames, name);
-    if (location_name.empty()) {
+    std::string location_name;
+    try {
+        location_name = find_indexed_by_name(mNames, name);
+    }
+    catch (NotFound&) {
         replacement = find_indexed_by_name(mReplacements, name);
-        if (!replacement.empty()) {
-            name = replacement;
-            location_name = find_indexed_by_name(mNames, name);
-        }
-        else
-            throw NotFound(name);
+        name = replacement;
+        location_name = find_indexed_by_name(mNames, name);
     }
     return LookupResult(aName, replacement, name, location_name, find_indexed_by_name(mLocations, location_name));
 
 } // LocDb::find
+
+// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 /// Local Variables:

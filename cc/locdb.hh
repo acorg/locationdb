@@ -7,6 +7,20 @@
 
 // ----------------------------------------------------------------------
 
+class NotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
+
+// ----------------------------------------------------------------------
+
+template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
+{
+    const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
+    if (it == aData.end() || it->first != aName)
+        throw NotFound(aName);
+    return it->second;
+}
+
+// ----------------------------------------------------------------------
+
 // Abbreviation, name
 class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
 {
@@ -98,14 +112,17 @@ class LookupResult
 class LocDb
 {
  public:
-    class NotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
-
     inline LocDb() = default;
 
     void importFrom(std::string aFilename);
     void exportTo(std::string aFilename, bool aPretty) const;
 
     LookupResult find(std::string aName) const;
+    inline std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
+
+    inline std::string country(std::string aName) const { return find(aName).country(); }
+    inline std::string continent(std::string aName) const { return continent_of_country(find(aName).country()); }
+
     std::string stat() const;
 
  private:
@@ -119,25 +136,6 @@ class LocDb
 
     friend class LocDbRootHandler;
 };
-
-// ----------------------------------------------------------------------
-
-template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
-{
-#pragma GCC diagnostic push
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wexit-time-destructors"
-#pragma GCC diagnostic ignored "-Wglobal-constructors"
-#endif
-    static const Value empty;
-#pragma GCC diagnostic pop
-    const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
-    // if (it != aData.end())
-    //     std::cerr << aName << "--" << it->first << "--" << it->second << std::endl;
-    // else
-    //     std::cerr << aName << "--" << "END" << "--" << aData.size() << std::endl;
-    return it == aData.end() || it->first != aName ? empty : it->second;
-}
 
 // ----------------------------------------------------------------------
 /// Local Variables:
