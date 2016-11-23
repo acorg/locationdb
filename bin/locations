@@ -4,20 +4,20 @@
 """
 """
 
-import sys, traceback
+import sys, os, traceback
 if sys.version_info.major != 3: raise RuntimeError("Run script with python3")
 from pathlib import Path
-sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("dist")), str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
+sys.path[:0] = [str(Path(os.environ["ACMACSD_ROOT"]).resolve().joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
 
 import locationdb_backend as ldb_m
-from locationdb import utilities
+from acmacs_base import timeit
 
 # ----------------------------------------------------------------------
 
 def main(args):
     ldb = ldb_m.LocDb()
-    with utilities.timeit("Reading locationdb"):
+    with timeit("Reading locationdb"):
         ldb.import_from(str(Path(args.path_to_locdb).expanduser()))
     for n in args.look_for:
         name = n.strip().upper()
@@ -39,7 +39,7 @@ try:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-d', '--debug', action='store_const', dest='loglevel', const=logging.DEBUG, default=logging.INFO, help='Enable debugging output.')
 
-    parser.add_argument('--db', action='store', dest='path_to_locdb', default="~/GH/locationdb/data/locationdb.json.xz")
+    parser.add_argument('--db', action='store', dest='path_to_locdb', default=os.environ["ACMACSD_ROOT"] + "/data/locationdb.json.xz")
     parser.add_argument('look_for', nargs="+", help='name to find.')
     parser.add_argument('-c', '--cdc-abbreviation', action="store_true", dest="cdc_abbreviation", default=False, help='find by cdc_abbreviation.')
     parser.add_argument('--country', action="store_true", dest="country", default=False, help='print just country.')

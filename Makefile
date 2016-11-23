@@ -32,12 +32,11 @@ PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 # -fvisibility=hidden and -flto make resulting lib smaller (pybind11) but linking is much slower
 OPTIMIZATION = -O3 #-fvisibility=hidden -flto
 PROFILE = # -pg
-CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include $(PKG_INCLUDES) $(MODULES_INCLUDE)
+CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include -I$(ACMACSD_ROOT)/include $(PKG_INCLUDES)
 LDFLAGS = $(OPTIMIZATION) $(PROFILE)
 LOCDB_LDLIBS = $$(pkg-config --libs liblzma)
 LOCDB_PY_LDLIBS = $(LOCDB_LDLIBS) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
 
-MODULES_INCLUDE = -Imodules/rapidjson/include -Imodules/pybind11/include
 PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 
 # ----------------------------------------------------------------------
@@ -48,7 +47,13 @@ DIST = $(abspath dist)
 # Do NOT use name locationdb.so for a non-python library because it will conflict with locationdb python module
 LOCATION_DB_LIB = $(DIST)/location-db.so
 
-all: $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
+all: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
+
+install: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
+	rsync -v $(LOCATION_DB_LIB) $(ACMACSD_ROOT)/lib
+	rsync -v $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(ACMACSD_ROOT)/py
+	ln -sf $(realpath data/locationdb.json.xz) $(ACMACSD_ROOT)/data
+	rsync -v bin/locations $(ACMACSD_ROOT)/bin
 
 -include $(BUILD)/*.d
 
@@ -62,32 +67,39 @@ $(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
 	g++ -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
 
 clean:
-	rm -rf $(DIST) $(BUILD)/*.o $(BUILD)/*.d $(BUILD)/submodules
+	rm -rf $(DIST) $(BUILD)/*.o $(BUILD)/*.d
 
 distclean: clean
 	rm -rf $(BUILD)
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/%.o: cc/%.cc | $(BUILD) $(BUILD)/submodules
+$(BUILD)/%.o: cc/%.cc | $(BUILD)
 	@echo $<
 	@g++ $(CXXFLAGS) -c -o $@ $<
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/submodules:
-	git submodule init
-	git submodule update
-	git submodule update --remote
-	touch $@
+# $(BUILD)/submodules:
+#	git submodule init
+#	git submodule update
+#	git submodule update --remote
+#	touch $@
 
 # ----------------------------------------------------------------------
+
+check-acmacsd-root:
+ifndef ACMACSD_ROOT
+	$(error ACMACSD_ROOT is not set)
+endif
 
 $(DIST):
 	mkdir -p $(DIST)
 
 $(BUILD):
 	mkdir -p $(BUILD)
+
+.PHONY: check-acmacsd-root
 
 # ======================================================================
 ### Local Variables:
