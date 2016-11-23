@@ -50,13 +50,13 @@ LOCATION_DB_LIB = $(DIST)/location-db.so
 all: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 
 install: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
-	rsync -v $(LOCATION_DB_LIB) $(ACMACSD_ROOT)/lib
+	ln -sf $(LOCATION_DB_LIB) $(ACMACSD_ROOT)/lib
 	if [ $$(uname) = "Darwin" ]; then /usr/bin/install_name_tool -id $(ACMACSD_ROOT)/lib/$(notdir $(LOCATION_DB_LIB)) $(ACMACSD_ROOT)/lib/$(notdir $(LOCATION_DB_LIB)); fi
 	if [ ! -d $(ACMACSD_ROOT)/include/locationdb ]; then mkdir $(ACMACSD_ROOT)/include/locationdb; fi
-	rsync -v cc/locdb.hh $(ACMACSD_ROOT)/include/locationdb
-	rsync -v $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(ACMACSD_ROOT)/py
+	ln -sf $(abspath cc)/locdb.hh $(ACMACSD_ROOT)/include/locationdb
+	ln -sf $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(ACMACSD_ROOT)/py
 	ln -sf $(realpath data/locationdb.json.xz) $(ACMACSD_ROOT)/data
-	rsync -v bin/locations $(ACMACSD_ROOT)/bin
+	ln -sf $(abspath bin)/locations $(ACMACSD_ROOT)/bin
 
 -include $(BUILD)/*.d
 
