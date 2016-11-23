@@ -122,8 +122,29 @@ class LocDb
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
     inline std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
 
-    inline std::string country(std::string aName) const { return find(aName).country(); }
-    inline std::string continent(std::string aName) const { return continent_of_country(find(aName).country()); }
+    inline std::string country(std::string aName, std::string for_not_found = std::string()) const
+        {
+            try {
+                return find(aName).country();
+            }
+            catch (LocationNotFound&) {
+                if (for_not_found.empty())
+                    throw;
+                return for_not_found;
+            }
+        }
+
+    inline std::string continent(std::string aName, std::string for_not_found = std::string()) const
+        {
+            try {
+                return continent_of_country(find(aName).country());
+            }
+            catch (LocationNotFound&) {
+                if (for_not_found.empty())
+                    throw;
+                return for_not_found;
+            }
+        }
 
     std::string stat() const;
 

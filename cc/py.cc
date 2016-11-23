@@ -54,8 +54,8 @@ PYBIND11_PLUGIN(locationdb_backend)
             .def("import_from", &LocDb::importFrom, py::arg("filename"))
             .def("find", &LocDb::find, py::arg("name"))
             .def("find_cdc_abbreviation", &LocDb::find_cdc_abbreviation, py::arg("abbreviation"))
-            .def("country", &LocDb::country, py::arg("name"))
-            .def("continent", &LocDb::continent, py::arg("name"))
+            .def("country", &LocDb::country, py::arg("name"), py::arg("for_not_found") = "")
+            .def("continent", &LocDb::continent, py::arg("name"), py::arg("for_not_found") = "")
             ;
 
     py::register_exception<LocationNotFound>(m, "LocationNotFound");
