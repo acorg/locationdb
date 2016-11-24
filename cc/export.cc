@@ -9,7 +9,7 @@
 #include "json-writer.hh"
 
 #include "export.hh"
-#include "read-file.hh"
+#include "acmacs-base/read-file.hh"
 
 // ----------------------------------------------------------------------
 
@@ -438,9 +438,9 @@ class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::U
 void locdb_import(std::string buffer, LocDb& aLocDb)
 {
     if (buffer == "-")
-        buffer = read_stdin();
+        buffer = acmacs_base::read_stdin();
     else
-        buffer = read_file(buffer);
+        buffer = acmacs_base::read_file(buffer);
     if (buffer[0] == '{') { // && buffer.find("\"  version\": \"hidb-v4\"") != std::string::npos) {
         LocDbReaderEventHandler handler{aLocDb};
         rapidjson::Reader reader;

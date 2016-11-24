@@ -9,7 +9,7 @@ MAKEFLAGS = -w
 
 # ----------------------------------------------------------------------
 
-LOCDB_SOURCES = locdb.cc export.cc read-file.cc xz.cc
+LOCDB_SOURCES = locdb.cc export.cc
 LOCDB_PY_SOURCES = py.cc $(LOCDB_SOURCES)
 
 # ----------------------------------------------------------------------
