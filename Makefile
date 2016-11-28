@@ -44,8 +44,7 @@ PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
 BUILD = build
 DIST = $(abspath dist)
 
-# Do NOT use name locationdb.so for a non-python library because it will conflict with locationdb python module
-LOCATION_DB_LIB = $(DIST)/location-db.so
+LOCATION_DB_LIB = $(DIST)/liblocationdb.so
 
 all: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 
