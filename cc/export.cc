@@ -427,10 +427,6 @@ class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::U
  private:
     LocDb& mLocDb;
     std::stack<std::unique_ptr<HandlerBase>> mHandler;
-
-      // ----------------------------------------------------------------------
-
-    friend void hidb_import(std::string, LocDb&);
 };
 
 // ----------------------------------------------------------------------
