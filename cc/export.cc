@@ -266,7 +266,7 @@ class LocationsHandler : public HandlerBase
     std::string mCountry;
     std::string mDivision;
 
-}; // class StringMappingHandler
+}; // class LocationsHandler
 
 // ----------------------------------------------------------------------
 
