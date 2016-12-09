@@ -29,34 +29,7 @@ void locdb_export_pretty(std::string /*aFilename*/, const LocDb& /*aLocDb*/)
 
 using HandlerBase = json_reader::HandlerBase<LocDb>;
 using StringMappingHandler = json_reader::StringMappingHandler<LocDb>;
-
-// ----------------------------------------------------------------------
-
-class ContinentsHandler : public HandlerBase
-{
- public:
-    inline ContinentsHandler(LocDb& aLocDb, Continents& aData)
-        : HandlerBase(aLocDb), mData(aData), mStarted(false) {}
-
-    inline virtual HandlerBase* StartArray()
-        {
-            if (mStarted)
-                throw json_reader::Failure();
-            mStarted = true;
-            return nullptr;
-        }
-
-    inline virtual HandlerBase* String(const char* str, rapidjson::SizeType length)
-        {
-            mData.emplace_back(str, length);
-            return nullptr;
-        }
-
- private:
-    Continents& mData;
-    bool mStarted;
-
-}; // class ContinentsHandler
+using ContinentsHandler = json_reader::StringListHandler<LocDb>;
 
 // ----------------------------------------------------------------------
 
