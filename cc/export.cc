@@ -7,7 +7,7 @@
 #include "rapidjson/error/en.h"
 
 #include "acmacs-base/json-writer.hh"
-#include "acmacs-base/read-file.hh"
+#include "acmacs-base/json-reader.hh"
 
 #include "export.hh"
 
@@ -27,94 +27,8 @@ void locdb_export_pretty(std::string /*aFilename*/, const LocDb& /*aLocDb*/)
 
 // ----------------------------------------------------------------------
 
-class Error : public std::runtime_error { public: using std::runtime_error::runtime_error; };
-class Failure : public std::exception { public: using std::exception::exception; };
-class Pop : public std::exception { public: using std::exception::exception; };
-
-class HandlerBase
-{
- public:
-    inline HandlerBase(LocDb& aLocDb) : mLocDb(aLocDb), mIgnore(false) {}
-    virtual ~HandlerBase();
-
-    inline virtual HandlerBase* StartObject() { std::cerr << "HandlerBase StartObject " << typeid(*this).name() << std::endl; throw Failure(); }
-    inline virtual HandlerBase* EndObject() { throw Pop(); }
-    inline virtual HandlerBase* StartArray() { throw Failure(); }
-    inline virtual HandlerBase* EndArray() { throw Pop(); }
-    inline virtual HandlerBase* Double(double d) { std::cerr << "Double: " << d << std::endl; throw Failure(); }
-    inline virtual HandlerBase* Int(int i) { std::cerr << "Int: " << i << std::endl; throw Failure(); }
-    inline virtual HandlerBase* Uint(unsigned u) { std::cerr << "Uint: " << u << std::endl; throw Failure(); }
-
-    inline virtual HandlerBase* Key(const char* str, rapidjson::SizeType length)
-        {
-            if ((length == 1 && *str == '_') || (length > 0 && *str == '?')) {
-                mIgnore = true;
-            }
-            else {
-                std::cerr << "Key: \"" << std::string(str, length) << '"' << std::endl;
-                throw Failure();
-            }
-            return nullptr;
-        }
-
-    inline virtual HandlerBase* String(const char* str, rapidjson::SizeType length)
-        {
-            if (mIgnore) {
-                mIgnore = false;
-            }
-            else {
-                std::cerr << "String: \"" << std::string(str, length) << '"' << std::endl;
-                throw Failure();
-            }
-            return nullptr;
-        }
-
- protected:
-    LocDb& mLocDb;
-    bool mIgnore;
-};
-
-HandlerBase::~HandlerBase()
-{
-}
-
-// ----------------------------------------------------------------------
-
-class StringMappingHandler : public HandlerBase
-{
- public:
-    inline StringMappingHandler(LocDb& aLocDb, std::vector<std::pair<std::string, std::string>>& aMapping)
-        : HandlerBase(aLocDb), mMapping(aMapping), mStarted(false) {}
-
-    inline virtual HandlerBase* StartObject()
-        {
-            if (mStarted)
-                throw Failure();
-            mStarted = true;
-            return nullptr;
-        }
-
-    inline virtual HandlerBase* Key(const char* str, rapidjson::SizeType length)
-        {
-            mKey.assign(str, length);
-            return nullptr;
-        }
-
-    inline virtual HandlerBase* String(const char* str, rapidjson::SizeType length)
-        {
-            if (mKey.empty())
-                throw Failure();
-            mMapping.emplace_back(mKey, std::string(str, length));
-            mKey.erase();
-            return nullptr;
-        }
-
- private:
-    std::vector<std::pair<std::string, std::string>>& mMapping;
-    bool mStarted;
-    std::string mKey;
-
-}; // class StringMappingHandler
+using HandlerBase = json_reader::HandlerBase<LocDb>;
+using StringMappingHandler = json_reader::StringMappingHandler<LocDb>;
 
 // ----------------------------------------------------------------------
 
@@ -127,7 +41,7 @@ class ContinentsHandler : public HandlerBase
     inline virtual HandlerBase* StartArray()
         {
             if (mStarted)
-                throw Failure();
+                throw json_reader::Failure();
             mStarted = true;
             return nullptr;
         }
@@ -142,7 +56,7 @@ class ContinentsHandler : public HandlerBase
     Continents& mData;
     bool mStarted;
 
-}; // class StringMappingHandler
+}; // class ContinentsHandler
 
 // ----------------------------------------------------------------------
 
@@ -155,7 +69,7 @@ class CountriesHandler : public HandlerBase
     inline virtual HandlerBase* StartObject()
         {
             if (mStarted)
-                throw Failure();
+                throw json_reader::Failure();
             mStarted = true;
             return nullptr;
         }
@@ -169,7 +83,7 @@ class CountriesHandler : public HandlerBase
     inline virtual HandlerBase* Uint(unsigned u)
         {
             if (mKey.empty())
-                throw Failure();
+                throw json_reader::Failure();
             mData.emplace_back(mKey, u);
             return nullptr;
         }
@@ -179,7 +93,7 @@ class CountriesHandler : public HandlerBase
     bool mStarted;
     std::string mKey;
 
-}; // class StringMappingHandler
+}; // class CountriesHandler
 
 // ----------------------------------------------------------------------
 
@@ -192,7 +106,7 @@ class LocationsHandler : public HandlerBase
     inline virtual HandlerBase* StartObject()
         {
             if (mStarted)
-                throw Failure();
+                throw json_reader::Failure();
             mStarted = true;
             return nullptr;
         }
@@ -200,7 +114,7 @@ class LocationsHandler : public HandlerBase
     inline virtual HandlerBase* StartArray()
         {
             if (mKey.empty() || mIndex != 5)
-                throw Failure();
+                throw json_reader::Failure();
             mIndex = 0;
             return nullptr;
         }
@@ -208,7 +122,7 @@ class LocationsHandler : public HandlerBase
     inline virtual HandlerBase* EndArray()
         {
             if (mKey.empty() || mIndex != 4)
-                throw Failure();
+                throw json_reader::Failure();
             mData.emplace_back(mKey, LocationEntry(mLatitude, mLongitude, mCountry, mDivision));
             mIndex = 5;
             return nullptr;
@@ -223,7 +137,7 @@ class LocationsHandler : public HandlerBase
     inline virtual HandlerBase* Double(double d)
         {
             if (mKey.empty())
-                throw Failure();
+                throw json_reader::Failure();
             switch (mIndex) {
               case 0:
                   mLatitude = d;
@@ -232,7 +146,7 @@ class LocationsHandler : public HandlerBase
                   mLongitude = d;
                   break;
               default:
-                throw Failure();
+                throw json_reader::Failure();
             }
             ++mIndex;
             return nullptr;
@@ -241,7 +155,7 @@ class LocationsHandler : public HandlerBase
     inline virtual HandlerBase* String(const char* str, rapidjson::SizeType length)
         {
             if (mKey.empty())
-                throw Failure();
+                throw json_reader::Failure();
             switch (mIndex) {
               case 2:
                   mCountry.assign(str, length);
@@ -250,7 +164,7 @@ class LocationsHandler : public HandlerBase
                   mDivision.assign(str, length);
                   break;
               default:
-                throw Failure();
+                throw json_reader::Failure();
             }
             ++mIndex;
             return nullptr;
@@ -297,22 +211,22 @@ class LocDbRootHandler : public HandlerBase
                   mKey = new_key;
                   break;
               case Keys::CdcAbbreviations:
-                  result = new StringMappingHandler(mLocDb, mLocDb.mCdcAbbreviations);
+                  result = new StringMappingHandler(mTarget, mTarget.mCdcAbbreviations);
                   break;
               case Keys::Continents:
-                  result = new ContinentsHandler(mLocDb, mLocDb.mContinents);
+                  result = new ContinentsHandler(mTarget, mTarget.mContinents);
                   break;
               case Keys::Countries:
-                  result = new CountriesHandler(mLocDb, mLocDb.mCountries);
+                  result = new CountriesHandler(mTarget, mTarget.mCountries);
                   break;
               case Keys::Locations:
-                  result = new LocationsHandler(mLocDb, mLocDb.mLocations);
+                  result = new LocationsHandler(mTarget, mTarget.mLocations);
                   break;
               case Keys::Names:
-                  result = new StringMappingHandler(mLocDb, mLocDb.mNames);
+                  result = new StringMappingHandler(mTarget, mTarget.mNames);
                   break;
               case Keys::Replacements:
-                  result = new StringMappingHandler(mLocDb, mLocDb.mReplacements);
+                  result = new StringMappingHandler(mTarget, mTarget.mReplacements);
                   break;
               case Keys::Unknown:
                   result = HandlerBase::Key(str, length);
@@ -328,11 +242,11 @@ class LocDbRootHandler : public HandlerBase
               case Keys::Version:
                   if (strncmp(str, "locationdb-v2", std::min(length, 13U))) {
                       std::cerr << "Unsupported version: \"" << std::string(str, length) << '"' << std::endl;
-                      throw Failure();
+                      throw json_reader::Failure();
                   }
                   break;
               case Keys::Date:
-                  mLocDb.mDate.assign(str, length);
+                  mTarget.mDate.assign(str, length);
                   break;
               case Keys::CdcAbbreviations:
               case Keys::Continents:
@@ -371,85 +285,9 @@ const std::vector<std::pair<std::string, LocDbRootHandler::Keys>> LocDbRootHandl
 
 // ----------------------------------------------------------------------
 
-class DocRootHandler : public HandlerBase
+void locdb_import(std::string aFilename, LocDb& aLocDb)
 {
- public:
-    inline DocRootHandler(LocDb& aLocDb) : HandlerBase(aLocDb) {}
-
-    inline virtual HandlerBase* StartObject() { return new LocDbRootHandler(mLocDb); }
-};
-
-// ----------------------------------------------------------------------
-
-class LocDbReaderEventHandler : public rapidjson::BaseReaderHandler<rapidjson::UTF8<>, LocDbReaderEventHandler>
-{
- private:
-    template <typename... Args> inline bool handler(HandlerBase* (HandlerBase::*aHandler)(Args... args), Args... args)
-        {
-            try {
-                auto new_handler = ((*mHandler.top()).*aHandler)(args...);
-                if (new_handler)
-                    mHandler.emplace(new_handler);
-            }
-            catch (Pop&) {
-                if (mHandler.empty())
-                    return false;
-                mHandler.pop();
-            }
-            catch (Failure&) {
-                return false;
-            }
-            return true;
-        }
-
- public:
-    inline LocDbReaderEventHandler(LocDb& aLocDb)
-        : mLocDb(aLocDb)
-        {
-            mHandler.emplace(new DocRootHandler(mLocDb));
-        }
-
-    inline bool StartObject() { return handler(&HandlerBase::StartObject); }
-    inline bool EndObject(rapidjson::SizeType /*memberCount*/) { return handler(&HandlerBase::EndObject); }
-    inline bool StartArray() { return handler(&HandlerBase::StartArray); }
-    inline bool EndArray(rapidjson::SizeType /*elementCount*/) { return handler(&HandlerBase::EndArray); }
-    inline bool Key(const char* str, rapidjson::SizeType length, bool /*copy*/) { return handler(&HandlerBase::Key, str, length); }
-    inline bool String(const Ch* str, rapidjson::SizeType length, bool /*copy*/) { return handler(&HandlerBase::String, str, length); }
-    inline bool Int(int i) { return handler(&HandlerBase::Int, i); }
-    inline bool Uint(unsigned u) { return handler(&HandlerBase::Uint, u); }
-    inline bool Double(double d) { return handler(&HandlerBase::Double, d); }
-
-      // inline bool Bool(bool /*b*/) { return false; }
-      // inline bool Null() { std::cout << "Null()" << std::endl; return false; }
-      // inline bool Int64(int64_t i) { std::cout << "Int64(" << i << ")" << std::endl; return false; }
-      // inline bool Uint64(uint64_t u) { std::cout << "Uint64(" << u << ")" << std::endl; return false; }
-
- private:
-    LocDb& mLocDb;
-    std::stack<std::unique_ptr<HandlerBase>> mHandler;
-};
-
-// ----------------------------------------------------------------------
-
-void locdb_import(std::string buffer, LocDb& aLocDb)
-{
-    if (buffer == "-")
-        buffer = acmacs_base::read_stdin();
-    else
-        buffer = acmacs_base::read_file(buffer);
-    if (buffer[0] == '{') { // && buffer.find("\"  version\": \"hidb-v4\"") != std::string::npos) {
-        LocDbReaderEventHandler handler{aLocDb};
-        rapidjson::Reader reader;
-        rapidjson::StringStream ss(buffer.c_str());
-        reader.Parse(ss, handler);
-        if (reader.HasParseError())
-            throw Error("cannot import locationdb: data parsing failed at pos " + std::to_string(reader.GetErrorOffset()) + ": " +  GetParseError_En(reader.GetParseErrorCode()) + "\n" + buffer.substr(reader.GetErrorOffset(), 50));
-          // std::cout << aLocDb.stat() << std::endl;
-        // if (!handler.in_init_state())
-        //     throw Error("internal: not in init state on parsing completion");
-    }
-    else
-        throw std::runtime_error("cannot import locationdb: unrecognized source format");
+    json_reader::read_from_file<LocDb, LocDbRootHandler>(aFilename, aLocDb);
 
 } // locdb_import
 
