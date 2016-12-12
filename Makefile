@@ -57,6 +57,12 @@ install: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(
 	ln -sf $(realpath data/locationdb.json.xz) $(ACMACSD_ROOT)/data
 	ln -sf $(abspath bin)/locations $(ACMACSD_ROOT)/bin
 
+test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
+	bin/locations moscow | diff test/moscow.txt -
+	bin/locations -c ug | diff test/ug.txt -
+
+# ----------------------------------------------------------------------
+
 -include $(BUILD)/*.d
 
 # ----------------------------------------------------------------------

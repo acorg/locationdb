@@ -1,0 +1,1 @@
+look_for:UG  name:UG location_name:UGANDA country:UGANDA division:CENTRAL lat/long: 0.32 32.58
