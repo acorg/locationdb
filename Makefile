@@ -49,14 +49,16 @@ LOCATION_DB_LIB = $(DIST)/liblocationdb.so
 
 all: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 
-install: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
+install: check-acmacsd-root install-headers $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 	ln -sf $(LOCATION_DB_LIB) $(ACMACSD_ROOT)/lib
 	if [ $$(uname) = "Darwin" ]; then /usr/bin/install_name_tool -id $(ACMACSD_ROOT)/lib/$(notdir $(LOCATION_DB_LIB)) $(ACMACSD_ROOT)/lib/$(notdir $(LOCATION_DB_LIB)); fi
-	if [ ! -d $(ACMACSD_ROOT)/include/locationdb ]; then mkdir $(ACMACSD_ROOT)/include/locationdb; fi
-	ln -sf $(abspath cc)/locdb.hh $(ACMACSD_ROOT)/include/locationdb
 	ln -sf $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(ACMACSD_ROOT)/py
 	ln -sf $(realpath data/locationdb.json.xz) $(ACMACSD_ROOT)/data
 	ln -sf $(abspath bin)/locations $(ACMACSD_ROOT)/bin
+
+install-headers:
+	if [ ! -d $(ACMACSD_ROOT)/include/locationdb ]; then mkdir $(ACMACSD_ROOT)/include/locationdb; fi
+	ln -sf $(abspath cc)/*.hh $(ACMACSD_ROOT)/include/locationdb
 
 test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 	env LD_LIBRARY_PATH=$(LIB_DIR) bin/locations moscow | diff test/moscow.txt -
@@ -83,7 +85,7 @@ distclean: clean
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/%.o: cc/%.cc | $(BUILD)
+$(BUILD)/%.o: cc/%.cc | $(BUILD) install-headers
 	@echo $<
 	@g++ $(CXXFLAGS) -c -o $@ $<
 
