@@ -24,6 +24,15 @@ template <typename Value> inline const Value& find_indexed_by_name(const std::ve
 // Abbreviation, name
 class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
 {
+ public:
+    inline std::string find_abbreviation_by_name(std::string aName) const
+        {
+            std::string result; // empty if not found
+            const auto found = std::find_if(begin(), end(), [&aName](const auto& e) -> bool { return e.second == aName; });
+            if (found != end())
+                result = found->first;
+            return result;
+        }
 };
 
 // ----------------------------------------------------------------------
@@ -121,6 +130,7 @@ class LocDb
     LookupResult find(std::string aName) const;
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
     inline std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
+    std::string abbreviation(std::string aName) const;
 
     inline std::string country(std::string aName, std::string for_not_found = std::string()) const
         {

@@ -1,3 +1,5 @@
+#include "acmacs-base/string.hh"
+
 #include "locdb.hh"
 #include "export.hh"
 
@@ -71,6 +73,29 @@ LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
 
 // ----------------------------------------------------------------------
 
+std::string LocDb::abbreviation(std::string aName) const
+{
+      // if it's in USA, use CDC abbreviation (if available)
+      // if aName has multiple words, use first letters of words in upper case
+      // otherwise use two letter of aName capitalized
+    std::string abbreviation;
+    try {
+        const auto found = find(aName);
+        if (found.country() == "UNITED STATES OF AMERICA")
+            abbreviation = mCdcAbbreviations.find_abbreviation_by_name(found.location_name);
+        if (abbreviation.empty())
+            aName = found.name;
+    }
+    catch (LocationNotFound&) {
+    }
+    if (abbreviation.empty()) {
+        abbreviation = string::first_letter_of_words(aName);
+        if (abbreviation.size() == 1 && aName.size() > 1)
+            abbreviation.push_back(static_cast<char>(tolower(aName[1])));
+    }
+    return abbreviation;
+
+} // LocDb::abbreviation
 
 // ----------------------------------------------------------------------
 /// Local Variables:
