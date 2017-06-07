@@ -3,9 +3,9 @@
 
 // ----------------------------------------------------------------------
 
-PYBIND11_PLUGIN(locationdb_backend)
+PYBIND11_MODULE(locationdb_backend, m)
 {
-    py::module m("locationdb_backend", "locationdb access plugin");
+    m.doc() = "locationdb access plugin";
 
       // ----------------------------------------------------------------------
 
@@ -31,10 +31,6 @@ PYBIND11_PLUGIN(locationdb_backend)
             ;
 
     py::register_exception<LocationNotFound>(m, "LocationNotFound");
-
-      // ----------------------------------------------------------------------
-
-    return m.ptr();
 }
 
 // ----------------------------------------------------------------------
