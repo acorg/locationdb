@@ -1,12 +1,6 @@
 #include <iostream>
 #include <stack>
 
-#pragma GCC diagnostic push
-#include "acmacs-base/rapidjson-diagnostics.hh"
-#include "rapidjson/reader.h"
-#include "rapidjson/error/en.h"
-#pragma GCC diagnostic pop
-
 #include "acmacs-base/json-writer.hh"
 #include "acmacs-base/json-reader.hh"
 
