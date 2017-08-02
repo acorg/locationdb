@@ -62,11 +62,11 @@ test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOC
 # ----------------------------------------------------------------------
 
 $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_PY_SOURCES)) | $(DIST)
-	$(GXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_PY_LDLIBS)
+	$(CXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_PY_LDLIBS)
 	@#strip $@
 
 $(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
-	$(GXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
+	$(CXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
 
 clean:
 	rm -rf $(DIST) $(BUILD)/*.o $(BUILD)/*.d
@@ -78,7 +78,7 @@ distclean: clean
 
 $(BUILD)/%.o: cc/%.cc | $(BUILD) install-headers
 	@echo $<
-	@$(GXX) $(CXXFLAGS) -c -o $@ $<
+	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # ----------------------------------------------------------------------
 
