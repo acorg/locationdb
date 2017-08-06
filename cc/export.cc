@@ -232,7 +232,9 @@ class LocDbRootHandler : public HandlerBase
  private:
     Keys mKey;
 
-};
+}; // class LocDbRootHandler
+
+// ----------------------------------------------------------------------
 
 #pragma GCC diagnostic push
 #ifdef __clang__

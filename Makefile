@@ -46,6 +46,7 @@ install: check-acmacsd-root install-headers $(DIST)/locationdb_backend$(PYTHON_M
 	ln -sf $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(ACMACSD_ROOT)/py
 	ln -sf $(realpath data/locationdb.json.xz) $(ACMACSD_ROOT)/data
 	ln -sf $(abspath bin)/locations $(ACMACSD_ROOT)/bin
+	ln -sf $(abspath bin)/locdb.py $(ACMACSD_ROOT)/bin/locdb
 
 install-headers:
 	if [ ! -d $(ACMACSD_ROOT)/include/locationdb ]; then mkdir $(ACMACSD_ROOT)/include/locationdb; fi
