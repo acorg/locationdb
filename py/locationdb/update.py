@@ -13,6 +13,21 @@ class CannotAdd (Exception): pass
 
 # ======================================================================
 
+def fix(save=True):
+    ldb = read.location_db()
+    num_fixes = 0
+    for name in ldb.data["locations"]:
+        if name not in ldb.data["names"]:
+            ldb.data["names"][name] = name
+            num_fixes += 1
+            module_logger.info('Fixed {!r}'.format(name))
+    if num_fixes:
+        ldb.updated()
+        if save:
+            ldb.save()
+
+# ----------------------------------------------------------------------
+
 def add(name, country, division, lat, long, save=True):
     ldb = read.location_db()
     name = name.upper()

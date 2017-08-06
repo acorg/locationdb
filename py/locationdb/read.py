@@ -58,6 +58,15 @@ def continent(name=None):
     except LocationNotFound:
         return ldb.find_continent(country=ldb.find(name=name)["country"])
 
+# ----------------------------------------------------------------------
+
+def check():
+    ldb = location_db()
+    try:
+        ldb.check()
+    except Exception as err:
+        module_logger.error(err)
+
 # ======================================================================
 
 class LocationDb:
@@ -168,6 +177,17 @@ class LocationDb:
     def updated(self):
         self.data[" date"] = datetime.date.today().strftime("%Y-%m-%d")
         self._updated = True
+
+    def check(self):
+        """Check if every "locations" entry has corresponding "names" entry"""
+        missing = []
+        for name in self.data["locations"]:
+            try:
+                n = self.data["names"][name]
+            except KeyError:
+                missing.append(name)
+        if missing:
+            raise RuntimeError("\"names\" list lacks:\n  " + "\n  ".join(missing))
 
     def save(self):
         if self._updated:
