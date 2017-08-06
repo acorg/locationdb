@@ -31,6 +31,7 @@ def add(name, country, division, lat, long, save=True):
         raise CannotAdd("Entry with lat/long already exists: {!r}".format(name_lat_long))
     division = division.upper()
     ldb.data["locations"][name] = [lat, long, country, division]
+    ldb.data["names"][name] = name
     ldb.updated()
     if save:
         ldb.save()
