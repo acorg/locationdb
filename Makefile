@@ -26,10 +26,10 @@ PROFILE = # -pg
 CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include -I$(ACMACSD_ROOT)/include $(PKG_INCLUDES)
 LDFLAGS = $(OPTIMIZATION) $(PROFILE)
 LIB_DIR = $(ACMACSD_ROOT)/lib
-LOCDB_LDLIBS = -L$(LIB_DIR) -lacmacsbase -lboost_filesystem -lboost_system $$(pkg-config --libs liblzma)
-LOCDB_PY_LDLIBS = $(LOCDB_LDLIBS) $$($(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
+LOCDB_LDLIBS = -L$(LIB_DIR) -lacmacsbase -lboost_filesystem -lboost_system $(shell pkg-config --libs liblzma)
+LOCDB_PY_LDLIBS = $(LOCDB_LDLIBS) $(shell $(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
 
-PKG_INCLUDES = $$(pkg-config --cflags liblzma) $$($(PYTHON_CONFIG) --includes)
+PKG_INCLUDES = $(shell pkg-config --cflags liblzma) $(shell $(PYTHON_CONFIG) --includes)
 
 # ----------------------------------------------------------------------
 
@@ -59,6 +59,8 @@ test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOC
 # ----------------------------------------------------------------------
 
 -include $(BUILD)/*.d
+
+include $(ACMACSD_ROOT)/share/Makefile.rtags
 
 # ----------------------------------------------------------------------
 
