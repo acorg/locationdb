@@ -63,16 +63,18 @@ include $(TARGET_ROOT)/share/Makefile.rtags
 # ----------------------------------------------------------------------
 
 $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_PY_SOURCES)) | $(DIST)
-	$(CXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_PY_LDLIBS)
+	@echo "SHARED     " $@ # '<--' $^
+	@$(CXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_PY_LDLIBS)
 	@#strip $@
 
 $(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
-	$(CXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
+	@echo "SHARED     " $@ # '<--' $^
+	@$(CXX) -shared $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS)
 
 # ----------------------------------------------------------------------
 
 $(BUILD)/%.o: cc/%.cc | $(BUILD) install-headers
-	@echo $<
+	@echo $(CXX_NAME) $<
 	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # ----------------------------------------------------------------------
