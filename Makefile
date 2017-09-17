@@ -41,9 +41,6 @@ install: check-acmacsd-root install-headers $(DIST)/locationdb_backend$(PYTHON_M
 	ln -sf $(abspath bin)/locations $(AD_BIN)
 	ln -sf $(abspath bin)/locdb.py $(AD_BIN)/locdb
 
-install-headers:
-	$(call install_headers,locationdb)
-
 test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 	env LD_LIBRARY_PATH=$(AD_LIB) bin/locations moscow | diff test/moscow.txt -
 	env LD_LIBRARY_PATH=$(AD_LIB) bin/locations -c ug | diff test/ug.txt -
