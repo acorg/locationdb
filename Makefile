@@ -21,10 +21,7 @@ PYTHON_VERSION = $(shell python3 -c 'import sys; print("{0.major}.{0.minor}".for
 PYTHON_CONFIG = python$(PYTHON_VERSION)-config
 PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
-# -fvisibility=hidden and -flto make resulting lib smaller (pybind11) but linking is much slower
-OPTIMIZATION = -O3 #-fvisibility=hidden -flto
-PROFILE = # -pg
-CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WEVERYTHING) $(WARNINGS) -I$(BUILD)/include -I$(AD_INCLUDE) $(PKG_INCLUDES)
+CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WARNINGS) -I$(BUILD)/include -I$(AD_INCLUDE) $(PKG_INCLUDES)
 LDFLAGS = $(OPTIMIZATION) $(PROFILE)
 LOCDB_LDLIBS = -L$(AD_LIB) -lacmacsbase -lboost_filesystem -lboost_system $(shell pkg-config --libs liblzma)
 LOCDB_PY_LDLIBS = $(LOCDB_LDLIBS) $(shell $(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
@@ -38,16 +35,14 @@ LOCATION_DB_LIB = $(DIST)/liblocationdb.so
 all: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 
 install: check-acmacsd-root install-headers $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
-	ln -sf $(LOCATION_DB_LIB) $(AD_LIB)
-	if [ $$(uname) = "Darwin" ]; then /usr/bin/install_name_tool -id $(AD_LIB)/$(notdir $(LOCATION_DB_LIB)) $(AD_LIB)/$(notdir $(LOCATION_DB_LIB)); fi
+	$(call install_lib,$(LOCATION_DB_LIB))
 	ln -sf $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(AD_PY)
 	ln -sf $(realpath data/locationdb.json.xz) $(AD_DATA)
 	ln -sf $(abspath bin)/locations $(AD_BIN)
 	ln -sf $(abspath bin)/locdb.py $(AD_BIN)/locdb
 
 install-headers:
-	if [ ! -d $(AD_INCLUDE)/locationdb ]; then mkdir $(AD_INCLUDE)/locationdb; fi
-	ln -sf $(abspath cc)/*.hh $(AD_INCLUDE)/locationdb
+	$(call install_headers,locationdb)
 
 test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOCATION_DB_LIB)
 	env LD_LIBRARY_PATH=$(AD_LIB) bin/locations moscow | diff test/moscow.txt -
