@@ -14,9 +14,8 @@ LOCDB_PY_SOURCES = py.cc $(LOCDB_SOURCES)
 
 # ----------------------------------------------------------------------
 
-TARGET_ROOT=$(shell if [ -f /Volumes/rdisk/ramdisk-id ]; then echo /Volumes/rdisk/AD; else echo $(ACMACSD_ROOT); fi)
-include $(TARGET_ROOT)/share/Makefile.g++
-include $(TARGET_ROOT)/share/Makefile.dist-build.vars
+include $(ACMACSD_ROOT)/share/makefiles/Makefile.g++
+include $(ACMACSD_ROOT)/share/makefiles/Makefile.dist-build.vars
 
 PYTHON_VERSION = $(shell python3 -c 'import sys; print("{0.major}.{0.minor}".format(sys.version_info))')
 PYTHON_CONFIG = python$(PYTHON_VERSION)-config
@@ -57,8 +56,8 @@ test: check-acmacsd-root $(DIST)/locationdb_backend$(PYTHON_MODULE_SUFFIX) $(LOC
 # ----------------------------------------------------------------------
 
 -include $(BUILD)/*.d
-
-include $(TARGET_ROOT)/share/Makefile.rtags
+include $(ACMACSD_ROOT)/share/makefiles/Makefile.dist-build.rules
+include $(ACMACSD_ROOT)/share/makefiles/Makefile.rtags
 
 # ----------------------------------------------------------------------
 
@@ -73,21 +72,9 @@ $(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
 
 # ----------------------------------------------------------------------
 
-$(BUILD)/%.o: cc/%.cc | $(BUILD) install-headers
-	@echo $(CXX_NAME) $<
-	@$(CXX) $(CXXFLAGS) -c -o $@ $<
-
-# ----------------------------------------------------------------------
-
-# $(BUILD)/submodules:
-#	git submodule init
-#	git submodule update
-#	git submodule update --remote
-#	touch $@
-
-# ----------------------------------------------------------------------
-
-include $(AD_SHARE)/Makefile.dist-build.rules
+# $(BUILD)/%.o: cc/%.cc | $(BUILD) install-headers
+#	@echo $(CXX_NAME) $<
+#	@$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # ======================================================================
 ### Local Variables:
