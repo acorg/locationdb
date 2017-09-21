@@ -123,8 +123,8 @@ class LocDb
  public:
     inline LocDb() = default;
 
-    void importFrom(std::string aFilename);
-    void exportTo(std::string aFilename, bool aPretty) const;
+    void importFrom(std::string aFilename, bool timer = false);
+    void exportTo(std::string aFilename, bool aPretty, bool timer = false) const;
 
       // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;

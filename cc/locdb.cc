@@ -1,3 +1,4 @@
+#include "acmacs-base/timeit.hh"
 #include "acmacs-base/string.hh"
 
 #include "locdb.hh"
@@ -5,16 +6,18 @@
 
 // ----------------------------------------------------------------------
 
-void LocDb::importFrom(std::string aFilename)
+void LocDb::importFrom(std::string aFilename, bool timer)
 {
+    Timeit timeit("locdb loading: ", std::cerr, timer);
     locdb_import(aFilename, *this);
 
 } // LocDb::importFrom
 
 // ----------------------------------------------------------------------
 
-void LocDb::exportTo(std::string aFilename, bool aPretty) const
+void LocDb::exportTo(std::string aFilename, bool aPretty, bool timer) const
 {
+    Timeit timeit("locdb exporting: ", std::cerr, timer);
     if (aPretty)
         locdb_export_pretty(aFilename, *this);
     else
