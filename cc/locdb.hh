@@ -170,6 +170,8 @@ class LocDb
     friend class LocDbRootHandler;
 };
 
+const LocDb& get_location_database(std::string aFilename, bool timer = false);
+
 // ----------------------------------------------------------------------
 /// Local Variables:
 /// eval: (if (fboundp 'eu-rename-buffer) (eu-rename-buffer))

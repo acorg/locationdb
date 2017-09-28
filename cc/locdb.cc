@@ -6,6 +6,28 @@
 
 // ----------------------------------------------------------------------
 
+#pragma GCC diagnostic push
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wglobal-constructors"
+#pragma GCC diagnostic ignored "-Wexit-time-destructors"
+#endif
+
+static std::unique_ptr<LocDb> sLocDb;
+
+#pragma GCC diagnostic pop
+
+const LocDb& get_location_database(std::string aFilename, bool timer)
+{
+    if (!sLocDb) {
+        sLocDb = std::make_unique<LocDb>();
+        sLocDb->importFrom(aFilename, timer);
+    }
+    return *sLocDb;
+
+} // get_location_database
+
+// ----------------------------------------------------------------------
+
 void LocDb::importFrom(std::string aFilename, bool timer)
 {
     Timeit timeit("locdb loading: ", std::cerr, timer);
