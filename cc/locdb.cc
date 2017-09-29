@@ -1,4 +1,3 @@
-#include "acmacs-base/timeit.hh"
 #include "acmacs-base/string.hh"
 
 #include "locdb.hh"
@@ -16,7 +15,7 @@ static std::unique_ptr<LocDb> sLocDb;
 
 #pragma GCC diagnostic pop
 
-const LocDb& get_location_database(std::string aFilename, bool timer)
+const LocDb& get_location_database(std::string aFilename, report_time timer)
 {
     if (!sLocDb) {
         sLocDb = std::make_unique<LocDb>();
@@ -28,7 +27,7 @@ const LocDb& get_location_database(std::string aFilename, bool timer)
 
 // ----------------------------------------------------------------------
 
-void LocDb::importFrom(std::string aFilename, bool timer)
+void LocDb::importFrom(std::string aFilename, report_time timer)
 {
     Timeit timeit("locdb loading: ", std::cerr, timer);
     locdb_import(aFilename, *this);
@@ -37,7 +36,7 @@ void LocDb::importFrom(std::string aFilename, bool timer)
 
 // ----------------------------------------------------------------------
 
-void LocDb::exportTo(std::string aFilename, bool aPretty, bool timer) const
+void LocDb::exportTo(std::string aFilename, bool aPretty, report_time timer) const
 {
     Timeit timeit("locdb exporting: ", std::cerr, timer);
     if (aPretty)

@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "acmacs-base/timeit.hh"
+
 // ----------------------------------------------------------------------
 
 class LocationNotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
@@ -123,8 +125,8 @@ class LocDb
  public:
     inline LocDb() = default;
 
-    void importFrom(std::string aFilename, bool timer = false);
-    void exportTo(std::string aFilename, bool aPretty, bool timer = false) const;
+    void importFrom(std::string aFilename, report_time timer = report_time::No);
+    void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::No) const;
 
       // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;
@@ -170,7 +172,7 @@ class LocDb
     friend class LocDbRootHandler;
 };
 
-const LocDb& get_location_database(std::string aFilename, bool timer = false);
+const LocDb& get_location_database(std::string aFilename, report_time timer = report_time::No);
 
 // ----------------------------------------------------------------------
 /// Local Variables:
