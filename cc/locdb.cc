@@ -1,6 +1,7 @@
 #include <cstdlib>
 
 #include "acmacs-base/string.hh"
+#include "acmacs-base/debug.hh"
 
 #include "locdb.hh"
 #include "export.hh"
@@ -73,6 +74,7 @@ std::string LocDb::stat() const
 
 LookupResult LocDb::find(std::string aName) const
 {
+      // std::cerr << "DEBUG: LocDb::find " << aName << DEBUG_LINE_FUNC << '\n';
     std::string name = aName;
     std::string replacement;
     std::string location_name;
