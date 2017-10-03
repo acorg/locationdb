@@ -1,7 +1,11 @@
+#include <cstdlib>
+
 #include "acmacs-base/string.hh"
 
 #include "locdb.hh"
 #include "export.hh"
+
+using namespace std::string_literals;
 
 // ----------------------------------------------------------------------
 
@@ -12,14 +16,20 @@
 #endif
 
 static std::unique_ptr<LocDb> sLocDb;
+static std::string sLocDbFilename = std::getenv("HOME") + "/AD/data/locationdb.json.xz"s;
 
 #pragma GCC diagnostic pop
 
-const LocDb& get_location_database(std::string aFilename, report_time timer)
+void locdb_setup(std::string aFilename)
+{
+    sLocDbFilename = aFilename;
+}
+
+const LocDb& get_locdb(report_time timer)
 {
     if (!sLocDb) {
         sLocDb = std::make_unique<LocDb>();
-        sLocDb->importFrom(aFilename, timer);
+        sLocDb->importFrom(sLocDbFilename, timer);
     }
     return *sLocDb;
 

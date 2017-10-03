@@ -172,7 +172,8 @@ class LocDb
     friend class LocDbRootHandler;
 };
 
-const LocDb& get_location_database(std::string aFilename, report_time timer = report_time::No);
+void locdb_setup(std::string aFilename);
+const LocDb& get_locdb(report_time timer = report_time::No);
 
 // ----------------------------------------------------------------------
 /// Local Variables:
