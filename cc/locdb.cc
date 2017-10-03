@@ -33,7 +33,7 @@ const LocDb& get_locdb(report_time timer)
     }
     return *sLocDb;
 
-} // get_location_database
+} // get_locdb
 
 // ----------------------------------------------------------------------
 
