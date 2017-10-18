@@ -40,7 +40,7 @@ const LocDb& get_locdb(report_time timer)
 
 void LocDb::importFrom(std::string aFilename, report_time timer)
 {
-    Timeit timeit("locdb loading: ", std::cerr, timer);
+    Timeit timeit("locdb loading: ", timer);
     locdb_import(aFilename, *this);
 
 } // LocDb::importFrom
@@ -49,7 +49,7 @@ void LocDb::importFrom(std::string aFilename, report_time timer)
 
 void LocDb::exportTo(std::string aFilename, bool aPretty, report_time timer) const
 {
-    Timeit timeit("locdb exporting: ", std::cerr, timer);
+    Timeit timeit("locdb exporting: ", timer);
     if (aPretty)
         locdb_export_pretty(aFilename, *this);
     else
