@@ -40,7 +40,7 @@ const LocDb& get_locdb(report_time timer)
 
 void LocDb::importFrom(std::string aFilename, report_time timer)
 {
-    Timeit timeit("locdb loading: ", timer);
+    Timeit timeit("DEBUG: locdb loading: ", timer);
     locdb_import(aFilename, *this);
 
 } // LocDb::importFrom
