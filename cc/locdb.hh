@@ -172,7 +172,7 @@ class LocDb
     friend class LocDbRootHandler;
 };
 
-void locdb_setup(std::string aFilename);
+void locdb_setup(std::string aFilename, bool aVerbose);
 const LocDb& get_locdb(report_time timer = report_time::No);
 
 // ----------------------------------------------------------------------

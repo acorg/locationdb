@@ -18,19 +18,21 @@ using namespace std::string_literals;
 
 static std::unique_ptr<LocDb> sLocDb;
 static std::string sLocDbFilename = std::getenv("HOME") + "/AD/data/locationdb.json.xz"s;
+static bool sVerbose = false;
 
 #pragma GCC diagnostic pop
 
-void locdb_setup(std::string aFilename)
+void locdb_setup(std::string aFilename, bool aVerbose)
 {
     sLocDbFilename = aFilename;
+    sVerbose = aVerbose;
 }
 
 const LocDb& get_locdb(report_time timer)
 {
     if (!sLocDb) {
         sLocDb = std::make_unique<LocDb>();
-        sLocDb->importFrom(sLocDbFilename, timer);
+        sLocDb->importFrom(sLocDbFilename, sVerbose ? report_time::Yes : timer);
     }
     return *sLocDb;
 
@@ -40,7 +42,7 @@ const LocDb& get_locdb(report_time timer)
 
 void LocDb::importFrom(std::string aFilename, report_time timer)
 {
-    Timeit timeit("DEBUG: locdb loading: ", timer);
+    Timeit timeit("DEBUG: LocDb loading from " + aFilename + ": ", timer);
     locdb_import(aFilename, *this);
 
 } // LocDb::importFrom
