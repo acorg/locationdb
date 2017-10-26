@@ -24,8 +24,9 @@ static bool sVerbose = false;
 
 void locdb_setup(std::string aFilename, bool aVerbose)
 {
-    sLocDbFilename = aFilename;
     sVerbose = aVerbose;
+    if (!aFilename.empty())
+        sLocDbFilename = aFilename;
 }
 
 const LocDb& get_locdb(report_time timer)
