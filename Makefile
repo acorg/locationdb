@@ -23,7 +23,7 @@ PYTHON_MODULE_SUFFIX = $(shell $(PYTHON_CONFIG) --extension-suffix)
 
 CXXFLAGS = -MMD -g $(OPTIMIZATION) $(PROFILE) -fPIC -std=$(STD) $(WARNINGS) -I$(BUILD)/include -I$(AD_INCLUDE) $(PKG_INCLUDES)
 LDFLAGS = $(OPTIMIZATION) $(PROFILE)
-LOCDB_LDLIBS = -L$(AD_LIB) -lacmacsbase $(shell pkg-config --libs liblzma)
+LOCDB_LDLIBS = $(AD_LIB)/$(call shared_lib_name,libacmacsbase,1,0) $(shell pkg-config --libs liblzma)
 LOCDB_PY_LDLIBS = $(LOCDB_LDLIBS) $(shell $(PYTHON_CONFIG) --ldflags | sed -E 's/-Wl,-stack_size,[0-9]+//')
 
 PKG_INCLUDES = $(shell pkg-config --cflags liblzma) $(shell $(PYTHON_CONFIG) --includes)
