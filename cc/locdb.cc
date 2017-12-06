@@ -85,15 +85,21 @@ LookupResult LocDb::find(std::string aName) const
         location_name = find_indexed_by_name(mNames, name);
     }
     catch (LocationNotFound&) {
-        if (name[0] == '#') {
-            name.erase(0, 1);
-            location_name = find_indexed_by_name(mCdcAbbreviations, name);
-        }
-        else {
-            replacement = find_indexed_by_name(mReplacements, name);
-            name = replacement;
-            location_name = find_indexed_by_name(mNames, name);
-        }
+        // try {
+            if (name[0] == '#') {
+                name.erase(0, 1);
+                location_name = find_indexed_by_name(mCdcAbbreviations, name);
+            }
+            else {
+                replacement = find_indexed_by_name(mReplacements, name);
+                name = replacement;
+                location_name = find_indexed_by_name(mNames, name);
+            }
+        // }
+        // catch (LocationNotFound& err) {
+        //     std::cerr << "LocDb find: not found: " << err.what() << '\n';
+        //     throw;
+        // }
     }
     return LookupResult(aName, replacement, name, location_name, find_indexed_by_name(mLocations, location_name));
 
