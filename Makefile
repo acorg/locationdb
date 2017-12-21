@@ -46,8 +46,8 @@ install: check-acmacsd-root install-headers $(LOCATION_DB_PY_LIB) $(LOCATION_DB_
 	ln -sf $(abspath bin)/locdb.py $(AD_BIN)/locdb
 
 test: check-acmacsd-root $(LOCATION_DB_PY_LIB) $(LOCATION_DB_LIB)
-	env LD_LIBRARY_PATH=$(AD_LIB) bin/locations moscow | diff test/moscow.txt -
-	env LD_LIBRARY_PATH=$(AD_LIB) bin/locations -c ug | diff test/ug.txt -
+	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations moscow | diff test/moscow.txt -
+	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations -c ug | diff test/ug.txt -
 
 # ----------------------------------------------------------------------
 
