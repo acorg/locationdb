@@ -1,12 +1,11 @@
 #include <cstdlib>
 
+#include "acmacs-base/acmacsd.hh"
 #include "acmacs-base/string.hh"
 #include "acmacs-base/debug.hh"
 
 #include "locdb.hh"
 #include "export.hh"
-
-using namespace std::string_literals;
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +16,7 @@ using namespace std::string_literals;
 #endif
 
 static std::unique_ptr<LocDb> sLocDb;
-static std::string sLocDbFilename = std::getenv("HOME") + "/AD/data/locationdb.json.xz"s;
+static std::string sLocDbFilename = acmacs::acmacsd_root() + "/data/locationdb.json.xz";
 static bool sVerbose = false;
 
 #pragma GCC diagnostic pop
