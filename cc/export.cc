@@ -257,7 +257,12 @@ const std::vector<std::pair<std::string, LocDbRootHandler::Keys>> LocDbRootHandl
 
 void locdb_import(std::string aFilename, LocDb& aLocDb)
 {
-    json_reader::read_from_file<LocDb, LocDbRootHandler>(aFilename, aLocDb);
+    try {
+        json_reader::read_from_file<LocDb, LocDbRootHandler>(aFilename, aLocDb);
+    }
+    catch (std::exception& err) {
+        std::cerr << "ERROR: (ignored) locdb not available: " << err.what() << '\n';
+    }
 
 } // locdb_import
 

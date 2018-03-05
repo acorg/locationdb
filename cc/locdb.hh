@@ -27,7 +27,7 @@ template <typename Value> inline const Value& find_indexed_by_name(const std::ve
 class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
 {
  public:
-    inline std::string find_abbreviation_by_name(std::string aName) const
+    std::string find_abbreviation_by_name(std::string aName) const
         {
             std::string result; // empty if not found
             const auto found = std::find_if(begin(), end(), [&aName](const auto& e) -> bool { return e.second == aName; });
@@ -58,15 +58,15 @@ typedef double Longitude;
 class LocationEntry
 {
  public:
-    inline LocationEntry() : mLatitude(90), mLongitude(0) {}
-    inline LocationEntry(Latitude aLatitude, Longitude aLongitude, std::string aCountry, std::string aDivision)
+    LocationEntry() : mLatitude(90), mLongitude(0) {}
+    LocationEntry(Latitude aLatitude, Longitude aLongitude, std::string aCountry, std::string aDivision)
         : mLatitude(aLatitude), mLongitude(aLongitude), mCountry(aCountry), mDivision(aDivision) {}
 
-    inline bool empty() const { return mCountry.empty(); }
-    inline Latitude latitude() const { return mLatitude; }
-    inline Longitude longitude() const { return mLongitude; }
-    inline std::string country() const { return mCountry; }
-    inline std::string division() const { return mDivision; }
+    bool empty() const { return mCountry.empty(); }
+    Latitude latitude() const { return mLatitude; }
+    Longitude longitude() const { return mLongitude; }
+    std::string country() const { return mCountry; }
+    std::string division() const { return mDivision; }
 
  private:
     Latitude mLatitude;
@@ -98,8 +98,8 @@ class Replacements : public std::vector<std::pair<std::string, std::string>>
 class LookupResult
 {
  public:
-    inline LookupResult(const LookupResult&) = default;
-    inline LookupResult(LookupResult&&) = default;
+    LookupResult(const LookupResult&) = default;
+    LookupResult(LookupResult&&) = default;
 
     const std::string look_for;
     const std::string replacement;
@@ -107,13 +107,13 @@ class LookupResult
     const std::string location_name;  // location entry name
     const LocationEntry& location;
 
-    inline Latitude latitude() const { return location.latitude(); }
-    inline Longitude longitude() const { return location.longitude(); }
-    inline std::string country() const { return location.country(); }
-    inline std::string division() const { return location.division(); }
+    Latitude latitude() const { return location.latitude(); }
+    Longitude longitude() const { return location.longitude(); }
+    std::string country() const { return location.country(); }
+    std::string division() const { return location.division(); }
 
  private:
-    inline LookupResult(std::string a_look_for, std::string a_replacement, std::string a_name, std::string a_location_name, const LocationEntry& a_location)
+    LookupResult(std::string a_look_for, std::string a_replacement, std::string a_name, std::string a_location_name, const LocationEntry& a_location)
         : look_for(a_look_for), replacement(a_replacement), name(a_name), location_name(a_location_name), location(a_location) {}
     friend class LocDb;
 };
@@ -123,18 +123,20 @@ class LookupResult
 class LocDb
 {
  public:
-    inline LocDb() = default;
+    LocDb() = default;
 
     void importFrom(std::string aFilename, report_time timer = report_time::No);
     void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::No) const;
 
+    bool empty() const { return mNames.empty(); }
+
       // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
-    inline std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
+    std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
     std::string abbreviation(std::string aName) const;
 
-    inline std::string country(std::string aName, std::string for_not_found = std::string()) const
+    std::string country(std::string aName, std::string for_not_found = std::string()) const
         {
             try {
                 return find(aName).country();
@@ -146,7 +148,7 @@ class LocDb
             }
         }
 
-    inline std::string continent(std::string aName, std::string for_not_found = std::string()) const
+    std::string continent(std::string aName, std::string for_not_found = std::string()) const
         {
             try {
                 return continent_of_country(find(aName).country());
