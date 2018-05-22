@@ -129,6 +129,7 @@ class LocDb
     void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::No) const;
 
     bool empty() const { return mNames.empty(); }
+    operator bool() const { return !empty(); }
 
       // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;
