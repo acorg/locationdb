@@ -26,7 +26,7 @@ def geonames(name):
 def _lookup(feature, **args):
 
     def make(entry):
-        if entry["fcl"] in ["A", "P"]:
+        if entry.get("fcl") in ["A", "P"]:
             return {
                 # "local_name": entry[],
                 "name": entry["toponymName"],
