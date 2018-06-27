@@ -30,8 +30,15 @@ def main(args):
 # ----------------------------------------------------------------------
 
 def lookup(name):
+    print(name, file=sys.stderr)
     url = "http://api.geonames.org/search?{}".format(urllib.parse.urlencode({"name": name, "username": "acorg", "type": "json"}))
-    rj = json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))
+    rj = None
+    while rj is None:
+        try:
+            rj = json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))
+        except urllib.error.HTTPError:
+            print("geonames is perhaps unhappy with too many requests, delaying", file=sys.stderr)
+            time.sleep(20)
     return [e2 for e2 in ({"name": name, "toponym": e1.get("toponymName"), "country": e1.get("countryName")} for e1 in rj["geonames"]) if e2]
 
 # ----------------------------------------------------------------------
