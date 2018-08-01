@@ -137,6 +137,7 @@ class LocDb
 
       // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;
+    LookupResult find_for_virus_name(std::string aVirusName) const;
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
     std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
     std::string abbreviation(std::string aName) const;

@@ -3,6 +3,7 @@
 #include "acmacs-base/acmacsd.hh"
 #include "acmacs-base/string.hh"
 #include "acmacs-base/debug.hh"
+#include "acmacs-base/virus-name.hh"
 
 #include "locdb.hh"
 #include "export.hh"
@@ -103,6 +104,19 @@ LookupResult LocDb::find(std::string aName) const
     return LookupResult(aName, replacement, name, location_name, find_indexed_by_name(mLocations, location_name));
 
 } // LocDb::find
+
+// ----------------------------------------------------------------------
+
+LookupResult LocDb::find_for_virus_name(std::string aVirusName) const
+{
+    try {
+        return find(virus_name::location(aVirusName));
+    }
+    catch (std::exception&) {
+        return find(virus_name::location_for_cdc_name(aVirusName));
+    }
+
+} // LocDb::find_for_virus_name
 
 // ----------------------------------------------------------------------
 
