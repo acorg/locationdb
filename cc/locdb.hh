@@ -1,11 +1,11 @@
 #pragma once
 
 #include <iostream>
-#include <string>
 #include <vector>
 #include <algorithm>
 
 #include "acmacs-base/timeit.hh"
+#include "acmacs-base/string.hh"
 
 // ----------------------------------------------------------------------
 
@@ -15,10 +15,14 @@ class LocationNotFound : public std::runtime_error { public: using std::runtime_
 
 template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
 {
-    const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
-    if (it == aData.end() || it->first != aName)
-        throw LocationNotFound(aName);
-    return it->second;
+    if (const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
+        it != aData.end() && it->first == aName)
+        return it->second;
+    if (aName.find('_') != std::string::npos)
+        return find_indexed_by_name(aData, string::replace(aName, '_', ' ')); // non-acmacs names may have _ instead of space, e.g. NEW_YORK
+    if (aName.find('-') != std::string::npos)
+        return find_indexed_by_name(aData, string::replace(aName, '-', ' ')); // non-acmacs names may have - instead of space, e.g. NEW-YORK
+    throw LocationNotFound(aName);
 }
 
 // ----------------------------------------------------------------------
