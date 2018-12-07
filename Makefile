@@ -44,7 +44,7 @@ libs: $(LOCATION_DB_LIB) $(LOCATION_DB_PY_LIB)
 
 $(LOCATION_DB_PY_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_PY_SOURCES)) | $(DIST)
 	$(call echo_shared_lib,$@)
-	$(call make_shared_lib,$(LOCATION_DB_PY_LIB_NAME),$(LOCATION_DB_PY_LIB_MAJOR),$(LOCATION_DB_PY_LIB_MINOR)) $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS) $(PYTHON_LDLIBS)
+	$(call make_shared_lib,$(LOCATION_DB_PY_LIB_NAME),$(LOCATION_DB_PY_LIB_MAJOR),$(LOCATION_DB_PY_LIB_MINOR)) $(LDFLAGS) -o $@ $^ $(LOCDB_LDLIBS) $(PYTHON_LIBS)
 
 $(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
 	$(call echo_shared_lib,$@)
