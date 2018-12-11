@@ -129,8 +129,8 @@ class LocDb
  public:
     LocDb() = default;
 
-    void importFrom(std::string aFilename, report_time timer = report_time::No);
-    void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::No) const;
+    void importFrom(std::string aFilename, report_time timer = report_time::no);
+    void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::no) const;
 
     bool empty() const { return mNames.empty(); }
     operator bool() const { return !empty(); }
@@ -181,7 +181,7 @@ class LocDb
 };
 
 void locdb_setup(std::string aFilename, bool aVerbose);
-const LocDb& get_locdb(report_time timer = report_time::No);
+const LocDb& get_locdb(report_time timer = report_time::no);
 
 // ----------------------------------------------------------------------
 /// Local Variables:

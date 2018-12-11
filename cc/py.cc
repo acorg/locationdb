@@ -22,8 +22,8 @@ PYBIND11_MODULE(locationdb_backend, m)
 
     py::class_<LocDb>(m, "LocDb")
             .def(py::init<>())
-            // .def("export_to", [](const LocDb& aLocdb, std::string aFilename, bool aPretty, bool aTimer) { aLocdb.exportTo(aFilename, aPretty, aTimer ? report_time::Yes : report_time::No); }, py::arg("filename"), py::arg("pretty") = false, py::arg("timer") = false)
-            // .def("import_from", [](LocDb& aLocdb, std::string aFilename, bool aTimer) { aLocdb.importFrom(aFilename, aTimer ? report_time::Yes : report_time::No); }, py::arg("filename"), py::arg("timer") = false)
+            // .def("export_to", [](const LocDb& aLocdb, std::string aFilename, bool aPretty, bool aTimer) { aLocdb.exportTo(aFilename, aPretty, do_report_time(aTimer)); }, py::arg("filename"), py::arg("pretty") = false, py::arg("timer") = false)
+            // .def("import_from", [](LocDb& aLocdb, std::string aFilename, bool aTimer) { aLocdb.importFrom(aFilename, do_report_time(aTimer)); }, py::arg("filename"), py::arg("timer") = false)
             .def("find", &LocDb::find, py::arg("name"))
             .def("find_cdc_abbreviation", &LocDb::find_cdc_abbreviation, py::arg("abbreviation"))
             .def("country", &LocDb::country, py::arg("name"), py::arg("for_not_found") = "")
@@ -31,7 +31,7 @@ PYBIND11_MODULE(locationdb_backend, m)
             ;
 
     m.def("locdb_setup", &locdb_setup, py::arg("filename"), py::arg("verbose") = false);
-    m.def("get_locdb", [](bool aTimer) { return get_locdb(aTimer ? report_time::Yes : report_time::No); }, py::arg("timer") = false, py::return_value_policy::reference);
+    m.def("get_locdb", [](bool aTimer) { return get_locdb(do_report_time(aTimer)); }, py::arg("timer") = false, py::return_value_policy::reference);
 
     py::register_exception<LocationNotFound>(m, "LocationNotFound");
 }

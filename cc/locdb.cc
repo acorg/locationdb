@@ -33,7 +33,7 @@ const LocDb& get_locdb(report_time timer)
 {
     if (!sLocDb) {
         sLocDb = std::make_unique<LocDb>();
-        sLocDb->importFrom(sLocDbFilename, sVerbose ? report_time::Yes : timer);
+        sLocDb->importFrom(sLocDbFilename, sVerbose ? report_time::yes : timer);
     }
     return *sLocDb;
 
