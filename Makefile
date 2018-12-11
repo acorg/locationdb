@@ -34,7 +34,7 @@ install: install-headers libs
 	$(call symbolic_link,$(abspath bin)/locations,$(AD_BIN))
 	$(call symbolic_link,$(abspath bin)/locdb.py,$(AD_BIN)/locdb)
 
-test: libs
+test: install
 	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations moscow | diff test/moscow.txt -
 	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations -c ug | diff test/ug.txt -
 
