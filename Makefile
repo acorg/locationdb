@@ -37,6 +37,7 @@ install: install-headers libs
 test: install
 	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations moscow | diff test/moscow.txt -
 	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations -c ug | diff test/ug.txt -
+.PHONY: test
 
 libs: $(LOCATION_DB_LIB) $(LOCATION_DB_PY_LIB)
 
