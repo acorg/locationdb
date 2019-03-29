@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cctype>
 
 #include "acmacs-base/acmacsd.hh"
 #include "acmacs-base/string.hh"
@@ -82,18 +83,18 @@ LookupResult LocDb::find(std::string aName) const
     std::string replacement;
     std::string location_name;
     try {
-        location_name = find_indexed_by_name(mNames, name);
+        location_name = detail::find_indexed_by_name(mNames, name);
     }
     catch (LocationNotFound&) {
         // try {
             if (name[0] == '#') {
                 name.erase(0, 1);
-                location_name = find_indexed_by_name(mCdcAbbreviations, name);
+                location_name = detail::find_indexed_by_name(mCdcAbbreviations, name);
             }
             else {
-                replacement = find_indexed_by_name(mReplacements, name);
+                replacement = detail::find_indexed_by_name(mReplacements, name);
                 name = replacement;
-                location_name = find_indexed_by_name(mNames, name);
+                location_name = detail::find_indexed_by_name(mNames, name);
             }
         // }
         // catch (LocationNotFound& err) {
@@ -101,7 +102,7 @@ LookupResult LocDb::find(std::string aName) const
         //     throw;
         // }
     }
-    return LookupResult(aName, replacement, name, location_name, find_indexed_by_name(mLocations, location_name));
+    return LookupResult(aName, replacement, name, location_name, detail::find_indexed_by_name(mLocations, location_name));
 
 } // LocDb::find
 
@@ -124,10 +125,47 @@ LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
 {
     if (aAbbreviation[0] == '#')
         aAbbreviation.erase(0, 1);
-    const std::string location_name = find_indexed_by_name(mCdcAbbreviations, aAbbreviation);
-    return LookupResult(aAbbreviation, std::string(), aAbbreviation, location_name, find_indexed_by_name(mLocations, location_name));
+    const std::string location_name = detail::find_indexed_by_name(mCdcAbbreviations, aAbbreviation);
+    return LookupResult(aAbbreviation, std::string(), aAbbreviation, location_name, detail::find_indexed_by_name(mLocations, location_name));
 
 } // LocDb::find_cdc_abbreviation
+
+// ----------------------------------------------------------------------
+
+void LocDb::fix_location(virus_name::Name& name) const
+{
+    const auto fix1 = [this](const auto& src) {
+        if (detail::find_indexed_by_name_no_fixes(this->mNames, src).has_value())
+            return src;
+        if (const auto replacement_it = detail::find_indexed_by_name_no_fixes(this->mReplacements, src); replacement_it.has_value())
+            return replacement_it.value()->second;
+        throw LocationNotFound(src);
+    };
+
+    if (name.host.empty() && std::isalpha(name.isolation[0])) {
+        if (const auto num_start = std::find_if(std::begin(name.isolation), std::end(name.isolation), [](char cc) { return std::isdigit(cc); }); num_start != std::end(name.isolation)) {
+            // A/Jilin/Nanguan112/2007 (CDC sequences)
+            try {
+                name.location = fix1(string::concat(name.location, ' ', std::string_view(name.isolation.data(), static_cast<size_t>(num_start - name.isolation.begin()))));
+                name.isolation = std::string(num_start, name.isolation.end());
+                return;
+            }
+            catch (LocationNotFound&) {
+            }
+        }
+    }
+
+    try {
+        name.location = fix1(name.location);
+    }
+    catch (LocationNotFound&) {
+        if (!name.host.empty()) {
+            name.location = fix1(string::concat(name.host, ' ', name.location));
+            name.host.clear();
+        }
+    }
+
+} // LocDb::fix_location
 
 // ----------------------------------------------------------------------
 

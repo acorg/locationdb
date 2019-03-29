@@ -3,27 +3,41 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <optional>
 
 #include "acmacs-base/timeit.hh"
 #include "acmacs-base/string.hh"
 
 // ----------------------------------------------------------------------
 
+namespace virus_name { struct Name; }
+
 class LocationNotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
 
 // ----------------------------------------------------------------------
 
-template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
+namespace detail
 {
-    if (const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
-        it != aData.end() && it->first == aName)
-        return it->second;
-    if (aName.find('_') != std::string::npos)
-        return find_indexed_by_name(aData, string::replace(aName, '_', ' ')); // non-acmacs names may have _ instead of space, e.g. NEW_YORK
-    if (aName.find('-') != std::string::npos)
-        return find_indexed_by_name(aData, string::replace(aName, '-', ' ')); // non-acmacs names may have - instead of space, e.g. NEW-YORK
-    throw LocationNotFound(aName);
-}
+    template <typename Value> inline auto find_indexed_by_name_no_fixes(const std::vector<std::pair<std::string, Value>>& aData, std::string aName) -> std::optional<decltype(aData.begin())>
+    {
+        if (const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
+            it != aData.end() && it->first == aName)
+            return it;
+        else
+            return std::nullopt;
+    }
+
+    template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
+    {
+        if (const auto it = find_indexed_by_name_no_fixes(aData, aName); it.has_value())
+            return it.value()->second;
+        if (aName.find('_') != std::string::npos)
+            return find_indexed_by_name(aData, string::replace(aName, '_', ' ')); // non-acmacs names may have _ instead of space, e.g. NEW_YORK
+        if (aName.find('-') != std::string::npos)
+            return find_indexed_by_name(aData, string::replace(aName, '-', ' ')); // non-acmacs names may have - instead of space, e.g. NEW-YORK
+        throw LocationNotFound(aName);
+    }
+} // namespace detail
 
 // ----------------------------------------------------------------------
 
@@ -139,7 +153,8 @@ class LocDb
     LookupResult find(std::string aName) const;
     LookupResult find_for_virus_name(std::string aVirusName) const;
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
-    std::string continent_of_country(std::string aCountry) const { return mContinents[find_indexed_by_name(mCountries, aCountry)]; }
+    void fix_location(virus_name::Name& name) const;
+    std::string continent_of_country(std::string aCountry) const { return mContinents[detail::find_indexed_by_name(mCountries, aCountry)]; }
     std::string abbreviation(std::string aName) const;
 
     std::string country(std::string aName, std::string for_not_found = std::string()) const
