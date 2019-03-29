@@ -135,6 +135,7 @@ LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
 void LocDb::fix_location(virus_name::Name& name) const
 {
     const auto fix1 = [this](const auto& src) {
+        // std::cerr << "DEBUG: fix1 " << src << '\n';
         if (detail::find_indexed_by_name_no_fixes(this->mNames, src).has_value())
             return src;
         if (const auto replacement_it = detail::find_indexed_by_name_no_fixes(this->mReplacements, src); replacement_it.has_value())
@@ -160,8 +161,17 @@ void LocDb::fix_location(virus_name::Name& name) const
     }
     catch (LocationNotFound&) {
         if (!name.host.empty()) {
-            name.location = fix1(string::concat(name.host, ' ', name.location));
-            name.host.clear();
+            try {
+                name.location = fix1(string::concat(name.host, ' ', name.location));
+                name.host.clear();
+            }
+            catch (LocationNotFound&) {
+                const auto location = fix1(name.host);
+                // A/Algeria/G0281/16/2016
+                name.host.clear();
+                name.isolation = string::concat(name.location, '-', name.isolation);
+                name.location = location;
+            }
         }
     }
 
