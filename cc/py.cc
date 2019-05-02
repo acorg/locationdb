@@ -31,7 +31,8 @@ PYBIND11_MODULE(locationdb_backend, m)
             ;
 
     m.def("locdb_setup", &locdb_setup, py::arg("filename"), py::arg("verbose") = false);
-    m.def("get_locdb", [](bool aTimer) { return get_locdb(do_report_time(aTimer)); }, py::arg("timer") = false, py::return_value_policy::reference);
+    m.def("get_locdb", [](bool suppress_error, bool aTimer) { return get_locdb(suppress_error ? locdb_suppress_error::yes : locdb_suppress_error::no, do_report_time(aTimer)); },
+          py::arg("suppress_error") = false, py::arg("timer") = false, py::return_value_policy::reference);
 
     py::register_exception<LocationNotFound>(m, "LocationNotFound");
 }

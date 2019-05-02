@@ -30,11 +30,11 @@ void locdb_setup(std::string aFilename, bool aVerbose)
         sLocDbFilename = aFilename;
 }
 
-const LocDb& get_locdb(report_time timer)
+const LocDb& get_locdb(locdb_suppress_error suppress_error, report_time timer)
 {
     if (!sLocDb) {
         sLocDb = std::make_unique<LocDb>();
-        sLocDb->importFrom(sLocDbFilename, sVerbose ? report_time::yes : timer);
+        sLocDb->importFrom(sLocDbFilename, suppress_error, sVerbose ? report_time::yes : timer);
     }
     return *sLocDb;
 
@@ -42,10 +42,10 @@ const LocDb& get_locdb(report_time timer)
 
 // ----------------------------------------------------------------------
 
-void LocDb::importFrom(std::string aFilename, report_time timer)
+void LocDb::importFrom(std::string aFilename, locdb_suppress_error suppress_error, report_time timer)
 {
     Timeit timeit("DEBUG: LocDb loading from " + aFilename + ": ", timer);
-    locdb_import(aFilename, *this);
+    locdb_import(aFilename, *this, suppress_error);
 
 } // LocDb::importFrom
 

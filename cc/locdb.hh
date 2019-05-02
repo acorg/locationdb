@@ -14,6 +14,8 @@ namespace virus_name { struct Name; }
 
 class LocationNotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
 
+enum class locdb_suppress_error { no, yes };
+
 // ----------------------------------------------------------------------
 
 namespace detail
@@ -143,7 +145,7 @@ class LocDb
  public:
     LocDb() = default;
 
-    void importFrom(std::string aFilename, report_time timer = report_time::no);
+    void importFrom(std::string aFilename, locdb_suppress_error suppress_error, report_time timer = report_time::no);
     void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::no) const;
 
     bool empty() const { return mNames.empty(); }
@@ -196,7 +198,7 @@ class LocDb
 };
 
 void locdb_setup(std::string aFilename, bool aVerbose);
-const LocDb& get_locdb(report_time timer = report_time::no);
+const LocDb& get_locdb(locdb_suppress_error suppress_error = locdb_suppress_error::no, report_time timer = report_time::no);
 
 // ----------------------------------------------------------------------
 /// Local Variables:
