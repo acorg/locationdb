@@ -4,7 +4,6 @@
 #include "acmacs-base/acmacsd.hh"
 #include "acmacs-base/string.hh"
 #include "acmacs-base/debug.hh"
-#include "acmacs-base/virus-name.hh"
 
 #include "locdb.hh"
 #include "export.hh"
@@ -108,19 +107,6 @@ LookupResult LocDb::find(std::string aName) const
 
 // ----------------------------------------------------------------------
 
-LookupResult LocDb::find_for_virus_name(std::string aVirusName) const
-{
-    try {
-        return find(virus_name::location(aVirusName));
-    }
-    catch (std::exception&) {
-        return find(virus_name::location_for_cdc_name(aVirusName));
-    }
-
-} // LocDb::find_for_virus_name
-
-// ----------------------------------------------------------------------
-
 LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
 {
     if (aAbbreviation[0] == '#')
@@ -129,53 +115,6 @@ LookupResult LocDb::find_cdc_abbreviation(std::string aAbbreviation) const
     return LookupResult(aAbbreviation, std::string(), aAbbreviation, location_name, detail::find_indexed_by_name(mLocations, location_name));
 
 } // LocDb::find_cdc_abbreviation
-
-// ----------------------------------------------------------------------
-
-void LocDb::fix_location(virus_name::Name& name) const
-{
-    const auto fix1 = [this](const auto& src) {
-        // std::cerr << "DEBUG: fix1 " << src << '\n';
-        if (detail::find_indexed_by_name_no_fixes(this->mNames, src).has_value())
-            return src;
-        if (const auto replacement_it = detail::find_indexed_by_name_no_fixes(this->mReplacements, src); replacement_it.has_value())
-            return replacement_it.value()->second;
-        throw LocationNotFound(src);
-    };
-
-    if (name.host.empty() && std::isalpha(name.isolation[0])) {
-        if (const auto num_start = std::find_if(std::begin(name.isolation), std::end(name.isolation), [](char cc) { return std::isdigit(cc); }); num_start != std::end(name.isolation)) {
-            // A/Jilin/Nanguan112/2007 (CDC sequences)
-            try {
-                name.location = fix1(string::concat(name.location, ' ', std::string_view(name.isolation.data(), static_cast<size_t>(num_start - name.isolation.begin()))));
-                name.isolation = std::string(num_start, name.isolation.end());
-                return;
-            }
-            catch (LocationNotFound&) {
-            }
-        }
-    }
-
-    try {
-        name.location = fix1(name.location);
-    }
-    catch (LocationNotFound&) {
-        if (!name.host.empty()) {
-            try {
-                name.location = fix1(string::concat(name.host, ' ', name.location));
-                name.host.clear();
-            }
-            catch (LocationNotFound&) {
-                const auto location = fix1(name.host);
-                // A/Algeria/G0281/16/2016
-                name.host.clear();
-                name.isolation = string::concat(name.location, '-', name.isolation);
-                name.location = location;
-            }
-        }
-    }
-
-} // LocDb::fix_location
 
 // ----------------------------------------------------------------------
 
