@@ -261,8 +261,8 @@ void locdb_import(std::string aFilename, LocDb& aLocDb, locdb_suppress_error sup
         json_reader::read_from_file<LocDb, LocDbRootHandler>(aFilename, aLocDb);
     }
     catch (std::exception& err) {
-        if (suppress_error == locdb_suppress_error::no)
-            std::cerr << "ERROR: (ignored) locdb not available: " << err.what() << '\n';
+        if (suppress_error == locdb_suppress_error::no && !std::getenv("R_HOME")) // do not report if running under R
+            std::cerr << "WARNING: (ignored) locdb not available: " << err.what() << '\n';
     }
 
 } // locdb_import
