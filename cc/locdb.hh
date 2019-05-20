@@ -196,7 +196,10 @@ class LocDb
     friend class LocDbRootHandler;
 };
 
+// not thread safe!
 void locdb_setup(std::string aFilename, bool aVerbose);
+
+// not thread safe!
 const LocDb& get_locdb(locdb_suppress_error suppress_error = locdb_suppress_error::no, report_time timer = report_time::no);
 
 // ----------------------------------------------------------------------

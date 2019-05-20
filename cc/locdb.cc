@@ -22,6 +22,7 @@ static bool sVerbose = false;
 
 #pragma GCC diagnostic pop
 
+// not thread safe!
 void locdb_setup(std::string aFilename, bool aVerbose)
 {
     sVerbose = aVerbose;
@@ -29,6 +30,7 @@ void locdb_setup(std::string aFilename, bool aVerbose)
         sLocDbFilename = aFilename;
 }
 
+// not thread safe!
 const LocDb& get_locdb(locdb_suppress_error suppress_error, report_time timer)
 {
     if (!sLocDb) {
