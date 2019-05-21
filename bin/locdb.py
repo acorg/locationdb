@@ -68,7 +68,11 @@ def main(args):
                     def format_entry(entry):
                         country = entry["country"].upper()
                         country = sCountries.get(country, country)
-                        return "--add {name:<{max_name}s} {country:<{max_country}s} {division:<{max_division}s} {lat:>6.2f} {long:>7.2f}".format(name="'{}'".format(entry["name"].upper()), max_name=max_name + 2, country="'{}'".format(country), max_country=max_country + 2, division="'{}'".format(entry["province"].upper()), max_division=max_division + 2, lat=float(entry["latitude"]), long=float(entry["longitude"]))
+                        name = entry["name"].upper()
+                        division = entry["province"].upper()
+                        if country == "CHINA" and division not in name:
+                            name = f"{division} {name}"
+                        return "locdb --add {name:<{max_name}s} {country:<{max_country}s} {division:<{max_division}s} {lat:>6.2f} {long:>7.2f}".format(name=f"'{name}'", max_name=max_name + 2, country=f"'{country}'", max_country=max_country + 2, division=f"'{division}'", max_division=max_division + 2, lat=float(entry["latitude"]), long=float(entry["longitude"]))
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                 else:
                     entry = find(name=look_for, like=args.like, handle_replacement=True)
@@ -102,8 +106,8 @@ try:
     parser.add_argument('-g', '--geonames', action="store_true", dest='geonames', default=False, help='look in the geonames in order to update locationdb.')
     parser.add_argument('--add', action="store_true", dest='add', default=False, help='adds new entry, args: name country division lat long')
     parser.add_argument('--add-cdc-abbreviation', action="store_true", dest='add_cdc_abbreviation', default=False, help='adds cdc abbreaviation for a name, args: name cdc_abbreviation.')
-    parser.add_argument('--add-name', action="store_true", dest='add_name', default=False, help='adds new name for existing location, args: existing-name new-name.')
-    parser.add_argument('--add-replacement', action="store_true", dest='add_replacement', default=False, help='adds replacement for a name, args: existing-name-to-replace-with new-name.')
+    parser.add_argument('-n', '--add-name', action="store_true", dest='add_name', default=False, help='adds new name for existing location, args: existing-name new-name.')
+    parser.add_argument('-r', '--add-replacement', action="store_true", dest='add_replacement', default=False, help='adds replacement for a name, args: existing-name-to-replace-with new-name.')
     parser.add_argument('--no-check', action="store_false", dest='check', default=True, help='do not validate location db structure.')
     parser.add_argument('--fix', action="store_true", dest='fix', default=False, help='fix location db structure.')
 
