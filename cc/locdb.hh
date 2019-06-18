@@ -10,7 +10,12 @@
 
 // ----------------------------------------------------------------------
 
-class LocationNotFound : public std::runtime_error { public: using std::runtime_error::runtime_error; };
+class LocationNotFound : public std::runtime_error
+{
+  public:
+    using std::runtime_error::runtime_error;
+    LocationNotFound(std::string_view msg) : runtime_error(std::string(msg)) {}
+};
 
 enum class locdb_suppress_error { no, yes };
 
@@ -18,7 +23,7 @@ enum class locdb_suppress_error { no, yes };
 
 namespace detail
 {
-    template <typename Value> inline auto find_indexed_by_name_no_fixes(const std::vector<std::pair<std::string, Value>>& aData, std::string aName) -> std::optional<decltype(aData.begin())>
+    template <typename Value> inline auto find_indexed_by_name_no_fixes(const std::vector<std::pair<std::string, Value>>& aData, std::string_view aName) -> std::optional<decltype(aData.begin())>
     {
         if (const auto it = std::lower_bound(aData.begin(), aData.end(), aName, [](const auto& entry, const auto& look_for) -> bool { return entry.first < look_for; });
             it != aData.end() && it->first == aName)
@@ -27,7 +32,7 @@ namespace detail
             return std::nullopt;
     }
 
-    template <typename Value> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, std::string aName)
+    template <typename Value, typename S> inline const Value& find_indexed_by_name(const std::vector<std::pair<std::string, Value>>& aData, S aName)
     {
         if (const auto it = find_indexed_by_name_no_fixes(aData, aName); it.has_value())
             return it.value()->second;
@@ -83,8 +88,8 @@ class LocationEntry
     bool empty() const { return mCountry.empty(); }
     Latitude latitude() const { return mLatitude; }
     Longitude longitude() const { return mLongitude; }
-    std::string country() const { return mCountry; }
-    std::string division() const { return mDivision; }
+    std::string_view country() const { return mCountry; }
+    std::string_view division() const { return mDivision; }
 
  private:
     Latitude mLatitude;
@@ -127,8 +132,8 @@ class LookupResult
 
     Latitude latitude() const { return location.latitude(); }
     Longitude longitude() const { return location.longitude(); }
-    std::string country() const { return location.country(); }
-    std::string division() const { return location.division(); }
+    std::string_view country() const { return location.country(); }
+    std::string_view division() const { return location.division(); }
 
  private:
     LookupResult(std::string a_look_for, std::string a_replacement, std::string a_name, std::string a_location_name, const LocationEntry& a_location)
@@ -152,10 +157,10 @@ class LocDb
       // If aName starts with # - it is cdc abbreviation
     LookupResult find(std::string aName) const;
     LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
-    std::string continent_of_country(std::string aCountry) const { return mContinents[detail::find_indexed_by_name(mCountries, aCountry)]; }
+    std::string_view continent_of_country(std::string_view aCountry) const { return mContinents[detail::find_indexed_by_name(mCountries, aCountry)]; }
     std::string abbreviation(std::string aName) const;
 
-    std::string country(std::string aName, std::string for_not_found = std::string()) const
+    std::string_view country(std::string aName, std::string for_not_found = std::string()) const
         {
             try {
                 return find(aName).country();
@@ -167,7 +172,7 @@ class LocDb
             }
         }
 
-    std::string continent(std::string aName, std::string for_not_found = std::string()) const
+    std::string_view continent(std::string aName, std::string for_not_found = std::string()) const
         {
             try {
                 return continent_of_country(find(aName).country());
