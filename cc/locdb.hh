@@ -42,6 +42,7 @@ namespace detail
             return find_indexed_by_name(aData, string::replace(aName, '-', ' ')); // non-acmacs names may have - instead of space, e.g. NEW-YORK
         throw LocationNotFound(aName);
     }
+
 } // namespace detail
 
 // ----------------------------------------------------------------------

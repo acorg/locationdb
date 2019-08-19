@@ -4,6 +4,7 @@
 #include "acmacs-base/acmacsd.hh"
 #include "acmacs-base/string.hh"
 #include "acmacs-base/debug.hh"
+#include "acmacs-base/fmt.hh"
 
 #include "locdb.hh"
 #include "export.hh"
@@ -79,24 +80,46 @@ std::string LocDb::stat() const
 
 LookupResult LocDb::find(std::string aName) const
 {
-      // std::cerr << "DEBUG: LocDb::find " << aName << DEBUG_LINE_FUNC << '\n';
+    // std::cerr << "DEBUG: LocDb::find " << aName << DEBUG_LINE_FUNC << '\n';
     std::string name = aName;
     std::string replacement;
     std::string location_name;
     try {
-        location_name = detail::find_indexed_by_name(mNames, name);
+        if (const auto it = detail::find_indexed_by_name_no_fixes(mNames, aName); it.has_value())
+            location_name = it.value()->second;
+        else
+            throw LocationNotFound{name};
     }
     catch (LocationNotFound&) {
         // try {
-            if (name[0] == '#') {
-                name.erase(0, 1);
-                location_name = detail::find_indexed_by_name(mCdcAbbreviations, name);
-            }
-            else {
+        if (name[0] == '#') {
+            name.erase(0, 1);
+            location_name = detail::find_indexed_by_name(mCdcAbbreviations, name);
+        }
+        else {
+            try {
                 replacement = detail::find_indexed_by_name(mReplacements, name);
                 name = replacement;
                 location_name = detail::find_indexed_by_name(mNames, name);
             }
+            catch (LocationNotFound&) {
+                const auto find_with_replacement = [&](char to_replace) -> bool {
+                    if (aName.find(to_replace) != std::string::npos) {
+                        replacement = string::replace(aName, '_', ' ');
+                        const auto intermediate_result = find(replacement);
+                        if (!intermediate_result.replacement.empty())
+                            replacement = intermediate_result.replacement;
+                        location_name = intermediate_result.location_name;
+                        name = replacement;
+                        return true;
+                    }
+                    return false;
+                };
+
+                if (!find_with_replacement('_') || !find_with_replacement('-'))
+                    throw;
+            }
+        }
         // }
         // catch (LocationNotFound& err) {
         //     std::cerr << "LocDb find: not found: " << err.what() << '\n';
