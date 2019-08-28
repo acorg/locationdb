@@ -78,6 +78,7 @@ def main(args):
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                 else:
                     xfind(look_for.upper())
+                    print()
             except LocationNotFound as err:
                 print(f"ERROR: \"{look_for}\" NOT FOUND: {err}", file=sys.stderr)
 
