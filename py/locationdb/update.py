@@ -13,6 +13,11 @@ class CannotAdd (Exception): pass
 
 # ======================================================================
 
+def save():
+    read.location_db().save()
+
+# ======================================================================
+
 def fix(save=True):
     ldb = read.location_db()
     num_fixes = 0

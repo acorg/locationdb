@@ -28,7 +28,11 @@ class LocationReplacement (Exception):
 
 def find(name, like=False, handle_replacement=False):
     """May raise LocationNotFound and LocationReplacement"""
-    return location_db().find(name=name, like=like, handle_replacement=handle_replacement)
+    entry = location_db().find(name=name, like=like, handle_replacement=handle_replacement)
+    if isinstance(entry, list):
+        return entry
+    else:
+        return [entry]
 
 # ======================================================================
 
