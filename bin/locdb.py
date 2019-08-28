@@ -107,16 +107,27 @@ def xfind(look_for):
             words = look_for.split(separator)
             if find_report(" ".join(words), orig=look_for):
                 return
+            if words[-1].endswith("XIAN") and find_report(" ".join(words)[:-4], orig=look_for):
+                return
+
             # match by last word
-            try:
-                for entry in find(name=words[-1], like=True, handle_replacement=True):
-                    ewords = entry.name.split(" ")
-                    if all(ww in ewords for ww in words):
-                        print(f"look-for:{look_for!r} name:{entry.name!r} location:{entry.found!r} {replacement}division:{entry.division!r} country:{entry.country!r} continent:{entry.continent!r} lat:{entry.latitude!r} long:{entry.longitude!r}")
-                        print(f"WARNING: run to add replacement:\nlocdb -r {entry.name!r} {look_for!r}")
-                        return
-            except:
-                pass
+            def match_last_word():
+                try:
+                    for entry in find(name=words[-1], like=True, handle_replacement=True):
+                        ewords = entry.name.split(" ")
+                        if all(ww in ewords for ww in words):
+                            print(f"look-for:{look_for!r} name:{entry.name!r} location:{entry.found!r} {replacement}division:{entry.division!r} country:{entry.country!r} continent:{entry.continent!r} lat:{entry.latitude!r} long:{entry.longitude!r}")
+                            print(f"""WARNING: run to add replacement:\nlocdb -e '[{{"C": "replacement", "existing": "{entry.name}", "new": "{look_for}"}}]'""")
+                            return True
+                except:
+                    pass
+                return False
+            if match_last_word():
+                return
+            if words[-1].endswith("XIAN"):
+                words[-1] = words[-1][:-4]
+                if match_last_word():
+                    return
             # geonames by last word
             found = False
             for entry in geonames(name=words[-1]):
@@ -144,7 +155,7 @@ def find_report(look_for, like=False, orig=None):
             replacement = f"replacement:{e['replacement']!r} " if e.get("replacement") else ""
             print(f"look-for:{look_for!r} name:{e.name!r} location:{e.found!r} {replacement}division:{e.division!r} country:{e.country!r} continent:{e.continent!r} lat:{e.latitude!r} long:{e.longitude!r}")
         if orig and orig != look_for:
-            print(f"WARNING: run to add replacement:\nlocdb -r {e.name!r} {look_for!r}")
+            print(f"""WARNING: run to add replacement:\nlocdb -e '[{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}}]'""")
         return True
     except LocationNotFound as err:
         return False
