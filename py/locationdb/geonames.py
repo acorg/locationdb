@@ -7,7 +7,7 @@
 [GeoNames Search Webservice API](http://www.geonames.org/export/geonames-search.html)
 """
 
-import os, urllib.request, json
+import sys, os, urllib.request, json
 from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
 from .utilities import is_chinese
@@ -47,7 +47,11 @@ def _get(feature, result_maker, args):
     url = "http://api.geonames.org/{}?{}".format(feature, urllib.parse.urlencode(args))
     # module_logger.debug('_lookup {!r}'.format(url))
     rj = json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))
-    return [e2 for e2 in (result_maker(e1) for e1 in rj["geonames"]) if e2]
+    try:
+        return [e2 for e2 in (result_maker(e1) for e1 in rj["geonames"]) if e2]
+    except Exception as err:
+        print(f"ERROR: {rj}: {err}", file=sys.stderr)
+        raise RuntimeError(f"{rj}: {err}")
 
 # ----------------------------------------------------------------------
 

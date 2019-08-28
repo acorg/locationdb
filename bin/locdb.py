@@ -56,6 +56,7 @@ def main(args):
         do_eval(json.loads(args.to_eval))
     else:
         for look_for in args.look_for:
+            look_for = look_for.upper()
             try:
                 if args.cdc_abbreviation:
                     print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
@@ -81,7 +82,11 @@ def main(args):
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                     exit_code = 1
                 else:
-                    exit_code = xfind(look_for.upper())
+                    exit_code = xfind(look_for)
+                    if exit_code == 99 and "DOU" in look_for:
+                        exit_code = xfind(look_for.replace("DOU", "DU"))
+                        if exit_code != 99:
+                            print(f"""{{"C": "replacement", "existing": "", "new": "{look_for}"}}""")
                     print()
             except LocationNotFound as err:
                 print(f"ERROR: \"{look_for}\" NOT FOUND: {err}", file=sys.stderr)
@@ -153,7 +158,7 @@ def xfind(look_for):
         return 1
 
     print(f"ERROR: NOT FOUND: \"{look_for}\"", file=sys.stderr)
-    return 1
+    return 99
 
 # ======================================================================
 
