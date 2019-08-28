@@ -86,7 +86,7 @@ def main(args):
                     if exit_code == 99 and "DOU" in look_for:
                         exit_code = xfind(look_for.replace("DOU", "DU"))
                         if exit_code != 99:
-                            print(f"""{{"C": "replacement", "existing": "", "new": "{look_for}"}}""")
+                            print(f"""{{"C": "replacement", "existing": , "new": "{look_for}"}}""")
                     print()
             except LocationNotFound as err:
                 print(f"ERROR: \"{look_for}\" NOT FOUND: {err}", file=sys.stderr)
