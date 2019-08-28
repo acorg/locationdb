@@ -1,0 +1,17 @@
+# Time-stamp: <2019-08-28 16:57:19 eu>
+keywords: 
+* Downloads
+** list_of_counties_in_china-1581j.csv
+[2019-08-28 Wed] downloaded from https://www.downloadexcelfiles.com/wo_en/download-list-counties-peoples-republic-china#.XWaG5y2B39s
+
+./process-list-of-counties-in-china-1581j.py list_of_counties_in_china-1581j.csv
+
+* COMMENT local vars ======================================================================
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+#+STARTUP: showall indent
+Local Variables:
+eval: (auto-fill-mode 0)
+eval: (add-hook 'before-save-hook 'time-stamp)
+End:

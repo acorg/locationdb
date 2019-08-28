@@ -48,7 +48,7 @@ def add(name, country, division, lat, long, save=True):
     long = float(long)
     name_lat_long = ldb.find_by_lat_long(lat=lat, long=long)
     if name_lat_long is not None:
-        raise CannotAdd("Entry with lat/long already exists: {!r}".format(name_lat_long))
+        raise CannotAdd("{!r}: Entry with lat/long already exists: {!r}".format(name, name_lat_long))
     division = division.upper()
     ldb.data["locations"][name] = [lat, long, country, division]
     ldb.data["names"][name] = name

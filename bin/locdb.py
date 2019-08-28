@@ -13,6 +13,8 @@ sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
 from locationdb import check, fix, find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, add_replacement, find_cdc_abbreviation_for_name, LocationNotFound, save
 
+CHINA_DISTRICT_SUFFIXES = ["XIAN", "QU", "SHI"] # county, district, city
+
 # ======================================================================
 
 # acmacs:
@@ -22,6 +24,7 @@ from locationdb import check, fix, find, find_cdc_abbreviation, country, contine
 # ----------------------------------------------------------------------
 
 def main(args):
+    exit_code = 0
     if not os.environ.get("ACMACS_LOCATIONDB"):
         os.environ["ACMACS_LOCATIONDB"] = str(Path(sys.argv[0]).resolve().parents[1].joinpath("data", "locationdb.json.xz"))
     if args.check:
@@ -76,11 +79,13 @@ def main(args):
                             name = f"{division} {name}"
                         return "locdb --add {name:<{max_name}s} {country:<{max_country}s} {division:<{max_division}s} {lat:>6.2f} {long:>7.2f}".format(name=f"'{name}'", max_name=max_name + 2, country=f"'{country}'", max_country=max_country + 2, division=f"'{division}'", max_division=max_division + 2, lat=float(entry["latitude"]), long=float(entry["longitude"]))
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
+                    exit_code = 1
                 else:
-                    xfind(look_for.upper())
+                    exit_code = xfind(look_for.upper())
                     print()
             except LocationNotFound as err:
                 print(f"ERROR: \"{look_for}\" NOT FOUND: {err}", file=sys.stderr)
+    return exit_code
 
 # ======================================================================
 
@@ -90,28 +95,36 @@ def do_eval(to_eval):
     for entry in to_eval:
         cmd = entry.pop("C")
         if cmd == "add":
+            print(cmd, repr(entry["name"]))
             add(**entry, save=False)
         elif cmd == "replacement":
+            print(cmd, repr(entry["new"]), "->", repr(entry["existing"]))
             add_replacement(name_to_replace_with=entry["existing"], new_name=entry["new"], save=False)
+        elif cmd == "add_name":
+            print(cmd, repr(entry["new_name"]), "->", repr(entry["existing"]))
+            add_new_name(name=entry["existing"], new_name=entry["new_name"], save=False)
         else:
             raise RuntimeError(f"Unrecognized command: {cmd}")
+    print("saving locdb ...")
     save()
 
 # ======================================================================
 
 def xfind(look_for):
     if find_report(look_for):
-        return
+        return 0
     for separator in ["-", "_"]:
         if separator in look_for:
             words = look_for.split(separator)
             if find_report(" ".join(words), orig=look_for):
-                return
-            if words[-1].endswith("XIAN") and find_report(" ".join(words)[:-4], orig=look_for):
-                return
+                return 0
+            for suffix in CHINA_DISTRICT_SUFFIXES:
+                suffix_size = len(suffix)
+                if words[-1][-suffix_size:] == suffix and find_report(" ".join(words)[:-suffix_size], orig=look_for):
+                    return 0
 
             # match by last word
-            def match_last_word():
+            def match_last_word(words):
                 try:
                     for entry in find(name=words[-1], like=True, handle_replacement=True):
                         ewords = entry.name.split(" ")
@@ -122,29 +135,52 @@ def xfind(look_for):
                 except:
                     pass
                 return False
-            if match_last_word():
-                return
-            if words[-1].endswith("XIAN"):
-                words[-1] = words[-1][:-4]
-                if match_last_word():
-                    return
-            # geonames by last word
-            found = False
-            for entry in geonames(name=words[-1]):
-                division = entry["province"].upper()
-                country = entry["country"].upper()
-                name = entry["name"].upper()
-                name_words = name.split(" ")
-                if division == words[0] and any(nw in words for nw in name_words):
-                    if country == "CHINA":
-                        if name_words[-1] in ["XIAN", "QU", "SHI"]: # county, district, city
-                            name = " ".join(name_words[:-1])
-                    print(f"""locdb -e '[{{"C": "add", "name": "{division} {name}", "country": "{country}", "division": "{division}", "lat": {float(entry["latitude"]):>6.2f}, "long": {float(entry["longitude"]):>7.2f}}}, {{"C": "replacement", "existing": "{division} {name}", "new": "{look_for}"}}]'""")
-                    found = True
-            if found:
-                return
+
+            if match_last_word(words):
+                return 1
+            if try_geonames(look_for=words[-1], orig_name=look_for, words=words): # geonames by last word
+                return 1
+            for suffix in CHINA_DISTRICT_SUFFIXES:
+                suffix_size = len(suffix)
+                if words[-1][-suffix_size:] == suffix:
+                    words_without_suffix = words[:-1] + [words[-1][:-suffix_size]]
+                    if match_last_word(words_without_suffix):
+                        return 1
+                    if try_geonames(look_for=words[-1][:-suffix_size], orig_name=look_for, words=words_without_suffix): # geonames by last word without XIAN/QU/SHI suffix
+                        return 1
+
+    if try_geonames(look_for=look_for):
+        return 1
 
     print(f"ERROR: NOT FOUND: \"{look_for}\"", file=sys.stderr)
+    return 1
+
+# ======================================================================
+
+def try_geonames(look_for, orig_name=None, words=None):
+    # print(f"DEBUG: try_geonames {look_for!r} orig:{orig_name!r} {words}")
+    found = False
+    if not orig_name:
+        orig_name = look_for
+    for entry in geonames(name=look_for):
+        division = entry["province"].upper()
+        country = entry["country"].upper()
+        name = entry["name"].upper()
+        name_words = name.split(" ")
+        if not words or (division == words[0] and any(nw in words for nw in name_words)):
+            if country == "CHINA":
+                if name_words[-1] in CHINA_DISTRICT_SUFFIXES:
+                    name = " ".join(name_words[:-1])
+                full_name = f"{division} {name}"
+            else:
+                full_name = name
+            cmd = f"""locdb -e '[{{"C": "add", "name": "{full_name}", "country": "{country}", "division": "{division}", "lat": {float(entry["latitude"]):>6.2f}, "long": {float(entry["longitude"]):>7.2f}}}"""
+            if full_name != orig_name:
+                cmd += f""", {{"C": "replacement", "existing": "{full_name}", "new": "{orig_name}"}}"""
+            cmd += "]'"
+            print(cmd)
+            found = True
+    return found
 
 # ======================================================================
 
