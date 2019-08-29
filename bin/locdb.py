@@ -135,7 +135,7 @@ def xfind(look_for):
                         ewords = entry.name.split(" ")
                         if all(ww in ewords for ww in words):
                             print(f"look-for:{look_for!r} name:{entry.name!r} location:{entry.found!r} {replacement}division:{entry.division!r} country:{entry.country!r} continent:{entry.continent!r} lat:{entry.latitude!r} long:{entry.longitude!r}")
-                            print(f"""WARNING: run to add replacement:\nlocdb -e '[{{"C": "replacement", "existing": "{entry.name}", "new": "{look_for}"}}]'""")
+                            print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{entry.name}", "new": "{look_for}"}},""")
                             return True
                 except:
                     pass
@@ -153,6 +153,15 @@ def xfind(look_for):
                         return 1
                     if try_geonames(look_for=words[-1][:-suffix_size], orig_name=look_for, words=words_without_suffix): # geonames by last word without XIAN/QU/SHI suffix
                         return 1
+
+    for prefix in ["SOUTH", "NORTH"]:
+        prefix_size = len(prefix)
+        if look_for[:prefix_size] == prefix:
+            try_name = f"{prefix} {look_for[prefix_size:]}"
+            if find_report(try_name, orig=look_for):
+                return 0
+            if try_geonames(look_for=try_name, orig_name=look_for):
+                return 1
 
     if try_geonames(look_for=look_for):
         return 1
@@ -179,10 +188,9 @@ def try_geonames(look_for, orig_name=None, words=None):
                 full_name = f"{division} {name}"
             else:
                 full_name = name
-            cmd = f"""locdb -e '[{{"C": "add", "name": "{full_name}", "country": "{country}", "division": "{division}", "lat": {float(entry["latitude"]):>6.2f}, "long": {float(entry["longitude"]):>7.2f}}}"""
+            cmd = f"""{{"C": "add", "name": "{full_name}", "country": "{country}", "division": "{division}", "lat": {float(entry["latitude"]):>6.2f}, "long": {float(entry["longitude"]):>7.2f}}},"""
             if full_name != orig_name:
-                cmd += f""", {{"C": "replacement", "existing": "{full_name}", "new": "{orig_name}"}}"""
-            cmd += "]'"
+                cmd += f""" {{"C": "replacement", "existing": "{full_name}", "new": "{orig_name}"}},"""
             print(cmd)
             found = True
             if full_name == orig_name.replace("-", " ").replace("_", " "):
@@ -198,7 +206,7 @@ def find_report(look_for, like=False, orig=None):
             replacement = f"replacement:{e['replacement']!r} " if e.get("replacement") else ""
             print(f"look-for:{look_for!r} name:{e.name!r} location:{e.found!r} {replacement}division:{e.division!r} country:{e.country!r} continent:{e.continent!r} lat:{e.latitude!r} long:{e.longitude!r}")
         if orig and orig != look_for:
-            print(f"""WARNING: run to add replacement:\nlocdb -e '[{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}}]'""")
+            print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}}""")
         return True
     except LocationNotFound as err:
         return False
