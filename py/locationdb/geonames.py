@@ -53,7 +53,7 @@ def _get(feature, result_maker, args):
         except KeyError:
             if "the hourly limit of" in rj.get("status", {}).get("message"):
                 print(f"WARNING: {rj['status']['message']}", file=sys.stderr)
-                seconds_to_wait = 90
+                seconds_to_wait = 120
                 print(f"WARNING: about to wait {seconds_to_wait} seconds", file=sys.stderr)
                 time.sleep(seconds_to_wait)
             else:

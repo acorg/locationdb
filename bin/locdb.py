@@ -13,7 +13,7 @@ sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
 from locationdb import check, fix, find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, add_replacement, find_cdc_abbreviation_for_name, LocationNotFound, save
 
-CHINA_DISTRICT_SUFFIXES = ["XIAN", "QU", "SHI"] # county, district, city
+CHINA_DISTRICT_SUFFIXES = ["XIAN", "XIN", "QU", "SHI"] # county, district, city, XIN is typo in XIAN
 
 # ======================================================================
 
@@ -151,13 +151,29 @@ def xfind(look_for):
                     words_without_suffix = words[:-1] + [words[-1][:-suffix_size]]
                     if match_last_word(words_without_suffix):
                         return 1
-                    if try_geonames(look_for=words[-1][:-suffix_size], orig_name=look_for, words=words_without_suffix): # geonames by last word without XIAN/QU/SHI suffix
+                    if try_geonames(look_for=words_without_suffix[-1], orig_name=look_for, words=words_without_suffix): # geonames by last word without XIAN/QU/SHI suffix
+                        return 1
+            if len(words[-1]) > 5: # long last word, perhaps contains strange chines county name
+                for prefix_size in range(5, len(words[-1])):
+                    words_without_suffix = words[:-1] + [words[-1][:prefix_size]]
+                    if match_last_word(words_without_suffix):
+                        return 1
+                    if try_geonames(look_for=words_without_suffix[-1], orig_name=look_for, words=words_without_suffix):
                         return 1
 
     for prefix in ["SOUTH", "NORTH"]:
         prefix_size = len(prefix)
         if look_for[:prefix_size] == prefix:
             try_name = f"{prefix} {look_for[prefix_size:]}"
+            if find_report(try_name, orig=look_for):
+                return 0
+            if try_geonames(look_for=try_name, orig_name=look_for):
+                return 1
+
+    for suffix in ["_NRL"]:      # NRL: kazakhstan
+        suffix_size = len(suffix)
+        if look_for[-suffix_size:] == suffix:
+            try_name = look_for[:-suffix_size]
             if find_report(try_name, orig=look_for):
                 return 0
             if try_geonames(look_for=try_name, orig_name=look_for):
@@ -206,7 +222,7 @@ def find_report(look_for, like=False, orig=None):
             replacement = f"replacement:{e['replacement']!r} " if e.get("replacement") else ""
             print(f"look-for:{look_for!r} name:{e.name!r} location:{e.found!r} {replacement}division:{e.division!r} country:{e.country!r} continent:{e.continent!r} lat:{e.latitude!r} long:{e.longitude!r}")
         if orig and orig != look_for:
-            print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}}""")
+            print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}},""")
         return True
     except LocationNotFound as err:
         return False
