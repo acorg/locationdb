@@ -7,7 +7,7 @@
 [GeoNames Search Webservice API](http://www.geonames.org/export/geonames-search.html)
 """
 
-import sys, os, urllib.request, json
+import sys, os, urllib.request, json, time
 from pathlib import Path
 import logging; module_logger = logging.getLogger(__name__)
 from .utilities import is_chinese
@@ -46,12 +46,22 @@ def _get(feature, result_maker, args):
     args.update({"username": "acorg", "type": "json"})
     url = "http://api.geonames.org/{}?{}".format(feature, urllib.parse.urlencode(args))
     # module_logger.debug('_lookup {!r}'.format(url))
-    rj = json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))
-    try:
-        return [e2 for e2 in (result_maker(e1) for e1 in rj["geonames"]) if e2]
-    except Exception as err:
-        print(f"ERROR: {rj}: {err}", file=sys.stderr)
-        raise RuntimeError(f"{rj}: {err}")
+    while True:
+        rj = json.loads(urllib.request.urlopen(url=url).read().decode("utf-8"))
+        try:
+            return [e2 for e2 in (result_maker(e1) for e1 in rj["geonames"]) if e2]
+        except KeyError:
+            if "the hourly limit of" in rj.get("status", {}).get("message"):
+                print(f"WARNING: {rj['status']['message']}", file=sys.stderr)
+                seconds_to_wait = 90
+                print(f"WARNING: about to wait {seconds_to_wait} seconds", file=sys.stderr)
+                time.sleep(seconds_to_wait)
+            else:
+                print(f"ERROR: {rj}", file=sys.stderr)
+                raise RuntimeError(str(rj))
+        except Exception as err:
+            print(f"ERROR: {rj}: {err}", file=sys.stderr)
+            raise RuntimeError(f"{rj}: {err}")
 
 # ----------------------------------------------------------------------
 

@@ -185,6 +185,8 @@ def try_geonames(look_for, orig_name=None, words=None):
             cmd += "]'"
             print(cmd)
             found = True
+            if full_name == orig_name.replace("-", " ").replace("_", " "):
+                break
     return found
 
 # ======================================================================
