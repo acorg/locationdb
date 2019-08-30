@@ -82,7 +82,7 @@ def main(args):
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                     exit_code = 1
                 else:
-                    exit_code = xfind(look_for)
+                    exit_code = xfind(look_for, like=args.like)
                     if exit_code == 99 and "DOU" in look_for:
                         exit_code = xfind(look_for.replace("DOU", "DU"))
                         if exit_code != 99:
@@ -115,8 +115,8 @@ def do_eval(to_eval):
 
 # ======================================================================
 
-def xfind(look_for):
-    if find_report(look_for):
+def xfind(look_for, like):
+    if find_report(look_for, like=False):
         return 0
     for separator in ["-", "_"]:
         if separator in look_for:
@@ -178,6 +178,9 @@ def xfind(look_for):
                 return 0
             if try_geonames(look_for=try_name, orig_name=look_for):
                 return 1
+
+    if like:
+        find_report(look_for, like=True)
 
     if try_geonames(look_for=look_for):
         return 1
