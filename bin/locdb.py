@@ -84,7 +84,7 @@ def main(args):
                 else:
                     exit_code = xfind(look_for, like=args.like)
                     if exit_code == 99 and "DOU" in look_for:
-                        exit_code = xfind(look_for.replace("DOU", "DU"))
+                        exit_code = xfind(look_for.replace("DOU", "DU"), like=args.like)
                         if exit_code != 99:
                             print(f"""{{"C": "replacement", "existing": , "new": "{look_for}"}}""")
                     print()
