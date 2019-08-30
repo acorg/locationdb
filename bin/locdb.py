@@ -161,7 +161,7 @@ def xfind(look_for, like):
                     if try_geonames(look_for=words_without_suffix[-1], orig_name=look_for, words=words_without_suffix):
                         return 1
 
-    for prefix in ["SOUTH", "NORTH"]:
+    for prefix in ["SOUTH", "NORTH", "WEST", "EAST"]:
         prefix_size = len(prefix)
         if look_for[:prefix_size] == prefix:
             try_name = f"{prefix} {look_for[prefix_size:]}"
@@ -170,7 +170,16 @@ def xfind(look_for, like):
             if try_geonames(look_for=try_name, orig_name=look_for):
                 return 1
 
-    for suffix in ["_NRL", ".NRL", " NRL", ".GRC"]:      # NRL: kazakhstan
+    for prefix in ["NL-"]:
+        prefix_size = len(prefix)
+        if look_for[:prefix_size] == prefix:
+            try_name = look_for[prefix_size:]
+            if find_report(try_name, orig=look_for):
+                return 0
+            if try_geonames(look_for=try_name, orig_name=look_for):
+                return 1
+
+    for suffix in ["_NRL", ".NRL", " NRL", ".GRC", ".GR"]:      # NRL: kazakhstan
         suffix_size = len(suffix)
         if look_for[-suffix_size:] == suffix:
             try_name = look_for[:-suffix_size]
