@@ -13,7 +13,7 @@ sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
 from locationdb import check, fix, find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, add_replacement, find_cdc_abbreviation_for_name, LocationNotFound, save
 
-CHINA_DISTRICT_SUFFIXES = ["XIAN", "XIN", "QU", "SHI"] # county, district, city, XIN is typo in XIAN
+DISTRICT_SUFFIXES = ["XIAN", "XIN", "QU", "SHI"] # county, district, city, XIN is typo in XIAN, NRL:Kazakhstan
 
 # ======================================================================
 
@@ -118,12 +118,12 @@ def do_eval(to_eval):
 def xfind(look_for, like):
     if find_report(look_for, like=False):
         return 0
-    for separator in ["-", "_"]:
+    for separator in ["-", "_", "."]:
         if separator in look_for:
             words = look_for.split(separator)
             if find_report(" ".join(words), orig=look_for):
                 return 0
-            for suffix in CHINA_DISTRICT_SUFFIXES:
+            for suffix in DISTRICT_SUFFIXES:
                 suffix_size = len(suffix)
                 if words[-1][-suffix_size:] == suffix and find_report(" ".join(words)[:-suffix_size], orig=look_for):
                     return 0
@@ -145,7 +145,7 @@ def xfind(look_for, like):
                 return 1
             if try_geonames(look_for=words[-1], orig_name=look_for, words=words): # geonames by last word
                 return 1
-            for suffix in CHINA_DISTRICT_SUFFIXES:
+            for suffix in DISTRICT_SUFFIXES:
                 suffix_size = len(suffix)
                 if words[-1][-suffix_size:] == suffix:
                     words_without_suffix = words[:-1] + [words[-1][:-suffix_size]]
@@ -170,7 +170,7 @@ def xfind(look_for, like):
             if try_geonames(look_for=try_name, orig_name=look_for):
                 return 1
 
-    for suffix in ["_NRL"]:      # NRL: kazakhstan
+    for suffix in ["_NRL", ".NRL", " NRL", ".GRC"]:      # NRL: kazakhstan
         suffix_size = len(suffix)
         if look_for[-suffix_size:] == suffix:
             try_name = look_for[:-suffix_size]
@@ -202,7 +202,7 @@ def try_geonames(look_for, orig_name=None, words=None):
         name_words = name.split(" ")
         if not words or (division == words[0] and any(nw in words for nw in name_words)):
             if country == "CHINA":
-                if name_words[-1] in CHINA_DISTRICT_SUFFIXES:
+                if name_words[-1] in DISTRICT_SUFFIXES:
                     name = " ".join(name_words[:-1])
                 full_name = f"{division} {name}"
             else:
