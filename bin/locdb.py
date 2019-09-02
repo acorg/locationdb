@@ -179,7 +179,7 @@ def xfind(look_for, like):
             if try_geonames(look_for=try_name, orig_name=look_for):
                 return 1
 
-    for suffix in ["_NRL", ".NRL", " NRL", ".GRC", ".GR"]:      # NRL: kazakhstan
+    for suffix in ["_NRL", ".NRL", " NRL", ".GRC", ".GR", "_PT"]:      # NRL: kazakhstan
         suffix_size = len(suffix)
         if look_for[-suffix_size:] == suffix:
             try_name = look_for[:-suffix_size]
@@ -207,6 +207,7 @@ def try_geonames(look_for, orig_name=None, words=None):
     for entry in geonames(name=look_for):
         division = entry["province"].upper()
         country = entry["country"].upper()
+        country = sCountries.get(country, country)
         name = entry["name"].upper()
         name_words = name.split(" ")
         if not words or (division == words[0] and any(nw in words for nw in name_words)):
