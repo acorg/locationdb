@@ -170,7 +170,7 @@ def xfind(look_for, like):
             if try_geonames(look_for=try_name, orig_name=look_for):
                 return 1
 
-    for prefix in ["NL-"]:
+    for prefix in ["NL-", "TURKEY-"]:
         prefix_size = len(prefix)
         if look_for[:prefix_size] == prefix:
             try_name = look_for[prefix_size:]
@@ -179,7 +179,7 @@ def xfind(look_for, like):
             if try_geonames(look_for=try_name, orig_name=look_for):
                 return 1
 
-    for suffix in ["_NRL", ".NRL", " NRL", ".GRC", ".GR", "_PT"]:      # NRL: kazakhstan
+    for suffix in ["_NRL", ".NRL", " NRL", ".GRC", ".GR", " GR", "_PT", " PT"]:      # NRL: kazakhstan
         suffix_size = len(suffix)
         if look_for[-suffix_size:] == suffix:
             try_name = look_for[:-suffix_size]
