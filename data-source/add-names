@@ -1,0 +1,36 @@
+#! /bin/bash
+
+locdb -e '[
+
+]'
+
+
+cat >/dev/null <<EOF
+{"C": "add", "name": , "country": "CHINA", "division": "", "lat":  38.82, "long":  105.67},
+{"C": "replacement", "existing": , "new": },
+{"C": "add_name", "existing": , "new_name": },
+{"C": "add", "name": "NEIMENGGU ORDOS", "country": "CHINA", "division": "NEIMENGGU", "lat":  38.60, "long":   -109.80},
+EOF
+
+cat >/dev/null <<EOF
+(progn
+    (query-replace "2nd passage in eggs" "E2" nil (point-min) (point-max))
+    (query-replace "?/siat1" "X/SIAT1" nil (point-min) (point-max))
+    (query-replace "caco2 1/mdck 1" "CACO1/MDCK1" nil (point-min) (point-max))
+    (query-replace "_c=isolated directly from host; no passage_" "_c=OR_" nil (point-min) (point-max))  
+    (query-replace-regexp "embryonated chicken eggs e\\([0-9]+\\)" "E\\1" nil (point-min) (point-max))
+    (query-replace "c=passage details: embryonated eggs_" "c=E?_" nil (point-min) (point-max))
+    (query-replace "c=passage details: MDCK cells_" "c=MDCK?_" nil (point-min) (point-max))
+    (query-replace-regexp "mdck-siat1, passage no. \\([0-9]+\\)" "SIAT\\1" nil (point-min) (point-max))
+    (query-replace-regexp "mdck_\\([0-9]+\\)" "MDCK\\1" nil (point-min) (point-max))
+    (query-replace-regexp "_c=e>\\([0-9]+\\)_" "_c=E\\1_" nil (point-min) (point-max))
+    (query-replace-regexp "c=mixed infection: [^;]+; passage details: " "c=" nil (point-min) (point-max))
+    (query-replace-regexp "passaged in \\(embryonated chicken \\)?eggs" "E?" nil (point-min) (point-max))
+    (query-replace-regexp "spf embryonated chicken eggs" "SPFE?" nil (point-min) (point-max))
+    (query-replace-regexp "_c=\\(unknown\\|\\.\\|[0-9]+_day_[0-9]+\\)_" "_c=_" nil (point-min) (point-max))
+)
+EOF
+
+cat >/dev/null <<EOF
+(if (re-search-forward "^>r[0-9]+_") (progn (end-of-line) (insert "x=bad name_|_")))
+EOF
