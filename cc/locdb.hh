@@ -161,26 +161,46 @@ class LocDb
     std::string_view continent_of_country(std::string_view aCountry) const { return mContinents[detail::find_indexed_by_name(mCountries, aCountry)]; }
     std::string abbreviation(std::string aName) const;
 
-    std::string_view country(std::string aName, std::string for_not_found = std::string()) const
+    std::string_view country(std::string aName, std::string for_not_found = {}) const
         {
             try {
                 return find(aName).country();
             }
-            catch (LocationNotFound&) {
+            catch (std::exception&) {
                 if (for_not_found.empty())
                     throw;
                 return for_not_found;
             }
         }
 
-    std::string_view continent(std::string aName, std::string for_not_found = std::string()) const
+    std::string_view continent(std::string aName, std::string for_not_found = {}) const
         {
             try {
                 return continent_of_country(find(aName).country());
             }
-            catch (LocationNotFound&) {
+            catch (std::exception&) {
                 if (for_not_found.empty())
                     throw;
+                return for_not_found;
+            }
+        }
+
+    Latitude latitude(std::string aName, Latitude for_not_found = 360.0) const
+        {
+            try {
+                return find(aName).latitude();
+            }
+            catch (std::exception&) {
+                return for_not_found;
+            }
+        }
+
+    Longitude longitude(std::string aName, Longitude for_not_found = 360.0) const
+        {
+            try {
+                return find(aName).longitude();
+            }
+            catch (std::exception&) {
                 return for_not_found;
             }
         }
