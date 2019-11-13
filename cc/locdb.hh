@@ -51,7 +51,7 @@ namespace detail
 class CdcAbbreviations : public std::vector<std::pair<std::string, std::string>>
 {
  public:
-    std::string find_abbreviation_by_name(std::string aName) const
+    std::string find_abbreviation_by_name(std::string_view aName) const
         {
             std::string result; // empty if not found
             const auto found = std::find_if(begin(), end(), [&aName](const auto& e) -> bool { return e.second == aName; });
@@ -83,7 +83,7 @@ class LocationEntry
 {
  public:
     LocationEntry() : mLatitude(90), mLongitude(0) {}
-    LocationEntry(Latitude aLatitude, Longitude aLongitude, std::string aCountry, std::string aDivision)
+    LocationEntry(Latitude aLatitude, Longitude aLongitude, std::string_view aCountry, std::string_view aDivision)
         : mLatitude(aLatitude), mLongitude(aLongitude), mCountry(aCountry), mDivision(aDivision) {}
 
     bool empty() const { return mCountry.empty(); }
@@ -137,7 +137,7 @@ class LookupResult
     std::string_view division() const { return location.division(); }
 
  private:
-    LookupResult(std::string a_look_for, std::string a_replacement, std::string a_name, std::string a_location_name, const LocationEntry& a_location)
+    LookupResult(std::string_view a_look_for, std::string_view a_replacement, std::string_view a_name, std::string_view a_location_name, const LocationEntry& a_location)
         : look_for(a_look_for), replacement(a_replacement), name(a_name), location_name(a_location_name), location(a_location) {}
     friend class LocDb;
 };
@@ -149,19 +149,19 @@ class LocDb
  public:
     LocDb() = default;
 
-    void importFrom(std::string aFilename, locdb_suppress_error suppress_error, report_time timer = report_time::no);
-    void exportTo(std::string aFilename, bool aPretty, report_time timer = report_time::no) const;
+    void importFrom(std::string_view aFilename, locdb_suppress_error suppress_error, report_time timer = report_time::no);
+    void exportTo(std::string_view aFilename, bool aPretty, report_time timer = report_time::no) const;
 
     bool empty() const { return mNames.empty(); }
     operator bool() const { return !empty(); }
 
       // If aName starts with # - it is cdc abbreviation
-    LookupResult find(std::string aName) const;
-    LookupResult find_cdc_abbreviation(std::string aAbbreviation) const;
+    LookupResult find(std::string_view aName) const;
+    LookupResult find_cdc_abbreviation(std::string_view aAbbreviation) const;
     std::string_view continent_of_country(std::string_view aCountry) const { return mContinents[detail::find_indexed_by_name(mCountries, aCountry)]; }
-    std::string abbreviation(std::string aName) const;
+    std::string abbreviation(std::string_view aName) const;
 
-    std::string_view country(std::string aName, std::string for_not_found = {}) const
+    std::string_view country(std::string_view aName, std::string_view for_not_found = {}) const
         {
             try {
                 return find(aName).country();
@@ -173,7 +173,7 @@ class LocDb
             }
         }
 
-    std::string_view continent(std::string aName, std::string for_not_found = {}) const
+    std::string_view continent(std::string_view aName, std::string_view for_not_found = {}) const
         {
             try {
                 return continent_of_country(find(aName).country());
@@ -185,7 +185,7 @@ class LocDb
             }
         }
 
-    Latitude latitude(std::string aName, Latitude for_not_found = 360.0) const
+    Latitude latitude(std::string_view aName, Latitude for_not_found = 360.0) const
         {
             try {
                 return find(aName).latitude();
@@ -195,7 +195,7 @@ class LocDb
             }
         }
 
-    Longitude longitude(std::string aName, Longitude for_not_found = 360.0) const
+    Longitude longitude(std::string_view aName, Longitude for_not_found = 360.0) const
         {
             try {
                 return find(aName).longitude();
@@ -223,7 +223,7 @@ class LocDb
 };
 
 // not thread safe!
-void locdb_setup(std::string aFilename, bool aVerbose);
+void locdb_setup(std::string_view aFilename, bool aVerbose);
 
 // not thread safe!
 const LocDb& get_locdb(locdb_suppress_error suppress_error = locdb_suppress_error::no, report_time timer = report_time::no);
