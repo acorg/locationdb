@@ -13,6 +13,12 @@ sys.path[:0] = [str(Path(sys.argv[0]).resolve().parents[1].joinpath("py"))]
 import logging; module_logger = logging.getLogger(__name__)
 from locationdb import check, fix, find, find_cdc_abbreviation, country, continent, geonames, add, add_cdc_abbreviation, add_new_name, add_replacement, find_cdc_abbreviation_for_name, LocationNotFound, save
 
+try:
+    from unidecode import unidecode
+except Exception:
+    print(">> pip3 install unidecode (for better geonames support)")
+    def unidecode(text): return text
+
 DISTRICT_SUFFIXES = ["XIAN", "XIN", "QU", "SHI"] # county, district, city, XIN is typo in XIAN, NRL:Kazakhstan
 
 # ======================================================================
@@ -57,6 +63,8 @@ def main(args):
     else:
         for look_for in args.look_for:
             look_for = look_for.upper()
+            if len(args.look_for) > 1:
+                print(f">>>> \"{look_for}\"")
             try:
                 if args.cdc_abbreviation:
                     print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
@@ -118,6 +126,9 @@ def do_eval(to_eval):
 def xfind(look_for, like):
     if find_report(look_for, like=False):
         return 0
+    if len(look_for) < 3:
+        print(f">> \"{look_for}\" - too short")
+        return 1
     for separator in ["-", "_", "."]:
         if separator in look_for:
             words = look_for.split(separator)
@@ -201,10 +212,8 @@ def xfind(look_for, like):
 
 def try_geonames(look_for, orig_name=None, words=None):
     # print(f"DEBUG: try_geonames {look_for!r} orig:{orig_name!r} {words}")
-    found = False
-    if not orig_name:
-        orig_name = look_for
-    for entry in geonames(name=look_for):
+
+    def make(entry):
         division = entry["province"].upper()
         country = entry["country"].upper()
         country = sCountries.get(country, country)
@@ -217,14 +226,32 @@ def try_geonames(look_for, orig_name=None, words=None):
                 full_name = f"{division} {name}"
             else:
                 full_name = name
-            cmd = f"""{{"C": "add", "name": "{full_name}", "country": "{country}", "division": "{division}", "lat": {float(entry["latitude"]):>6.2f}, "long": {float(entry["longitude"]):>7.2f}}},"""
-            if full_name != orig_name:
-                cmd += f""" {{"C": "replacement", "existing": "{full_name}", "new": "{orig_name}"}},"""
-            print(cmd)
-            found = True
-            if full_name == orig_name.replace("-", " ").replace("_", " "):
-                break
-    return found
+            return {
+                "C": "add",
+                "name": unidecode(full_name).replace("'", ""),
+                "country": sCountries.get(entry["country"].upper(), entry["country"].upper()),
+                "division": unidecode(division).replace("'", ""),
+                "lat": f"{float(entry['latitude']):>6.2f}",
+                "long": f"{float(entry['longitude']):>7.2f}",
+            }
+        else:
+            return None
+
+    found = [e2 for e2 in (make(e1) for e1 in geonames(name=look_for)) if e2]
+    if not found:
+        return False
+    for found_exact in sorted((en for en in found if en["name"] == look_for), key=lambda en: en["country"]):
+        print(json.dumps(found_exact))
+
+    last_country = None
+    for found_rest in sorted((en for en in found if en["name"] != look_for), key=lambda en: en["country"] + en["name"]):
+        if last_country != found_rest["country"]:
+            last_country = found_rest["country"]
+            print(last_country)
+        if not check_find(found_rest["name"]):
+            print(json.dumps(found_rest))
+        print(f"""    {{"C": "replacement", "existing": "{found_rest["name"]}", "new": "{look_for}"}},""")
+    return True
 
 # ======================================================================
 
@@ -238,6 +265,15 @@ def find_report(look_for, like=False, orig=None):
             print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}},""")
         return True
     except LocationNotFound as err:
+        return False
+
+# ----------------------------------------------------------------------
+
+def check_find(look_for):
+    try:
+        find(name=look_for, like=False, handle_replacement=False)
+        return True
+    except: # LocationNotFound as err:
         return False
 
 # ======================================================================

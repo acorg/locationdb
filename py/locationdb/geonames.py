@@ -15,6 +15,8 @@ from .utilities import is_chinese
 # ======================================================================
 
 def geonames(name):
+    if not name:
+        return name
     if is_chinese(name):
         r = _lookup_chinese(name=name)
     else:
