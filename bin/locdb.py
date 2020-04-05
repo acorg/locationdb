@@ -231,8 +231,8 @@ def try_geonames(look_for, orig_name=None, words=None):
                 "name": unidecode(full_name).replace("'", ""),
                 "country": sCountries.get(entry["country"].upper(), entry["country"].upper()),
                 "division": unidecode(division).replace("'", ""),
-                "lat": f"{float(entry['latitude']):>6.2f}",
-                "long": f"{float(entry['longitude']):>7.2f}",
+                "lat": f"{float(entry['latitude']):>.2f}",
+                "long": f"{float(entry['longitude']):>.2f}",
             }
         else:
             return None
@@ -241,7 +241,7 @@ def try_geonames(look_for, orig_name=None, words=None):
     if not found:
         return False
     for found_exact in sorted((en for en in found if en["name"] == look_for), key=lambda en: en["country"]):
-        print(json.dumps(found_exact))
+        print(json.dumps(found_exact), ",")
 
     last_country = None
     for found_rest in sorted((en for en in found if en["name"] != look_for), key=lambda en: en["country"] + en["name"]):
@@ -249,8 +249,8 @@ def try_geonames(look_for, orig_name=None, words=None):
             last_country = found_rest["country"]
             print(last_country)
         if not check_find(found_rest["name"]):
-            print(json.dumps(found_rest))
-        print(f"""    {{"C": "replacement", "existing": "{found_rest["name"]}", "new": "{look_for}"}},""")
+            print(json.dumps(found_rest), ",")
+        print(f"""    {{"C": "replacement", "existing": "{found_rest["name"]}", "new": "{look_for}"}} ,""")
     return True
 
 # ======================================================================
