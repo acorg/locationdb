@@ -259,8 +259,10 @@ def find_report(look_for, like=False, orig=None):
     try:
         for e in find(name=look_for, like=like, handle_replacement=True):
             # pprint.pprint(entry, width=120)
-            replacement = f"replacement:{e['replacement']!r} " if e.get("replacement") else ""
-            print(f"look-for:{look_for!r} name:{e.name!r} location:{e.found!r} {replacement}division:{e.division!r} country:{e.country!r} continent:{e.continent!r} lat:{e.latitude!r} long:{e.longitude!r}")
+            if e.get("replacement"):
+                print(f"""Replace:"{e['replacement']}" Look:"{look_for}" Loc:"{e.found}" {e.latitude} {e.longitude} Div:"{e.division}" "{e.country}" "{e.continent}" """)
+            else:
+                print(f"""Name:"{e.name}" Look:"{look_for}" Loc:"{e.found}" {e.latitude} {e.longitude} Div:"{e.division}" "{e.country}" "{e.continent}" """)
         if orig and orig != look_for:
             print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{e.name}", "new": "{orig}"}},""")
         return True
