@@ -100,7 +100,7 @@ LookupResult LocDb::find(std::string_view aName) const
             catch (LocationNotFound&) {
                 const auto find_with_replacement = [&](char to_replace) -> bool {
                     if (aName.find(to_replace) != std::string::npos) {
-                        replacement = string::replace(aName, '_', ' ');
+                        replacement = string::replace(aName, to_replace, ' ');
                         const auto intermediate_result = find(replacement);
                         if (!intermediate_result.replacement.empty())
                             replacement = intermediate_result.replacement;
@@ -111,7 +111,7 @@ LookupResult LocDb::find(std::string_view aName) const
                     return false;
                 };
 
-                if (!find_with_replacement('_') || !find_with_replacement('-'))
+                if (!find_with_replacement('_') && !find_with_replacement('-'))
                     throw;
             }
         }
