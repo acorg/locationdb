@@ -49,12 +49,13 @@ install: install-headers $(TARGETS)
 	$(call symbolic_link,$(abspath bin)/locdb.py,$(AD_BIN)/locdb)
 
 test: install
-ifneq ($(DEBUG),1)
-	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations moscow | diff test/moscow.txt -
-	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations -c ug | diff test/ug.txt -
-else
-	echo ">> WARNING: locdb tests do not work with address sanitizer (via python)"
-endif
+	echo ">> WARNING: write locdb tests (without py)"
+# ifneq ($(DEBUG),1)
+# 	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations moscow | diff test/moscow.txt -
+# 	env LD_LIBRARY_PATH=$(AD_LIB):$(LD_LIBRARY_PATH) bin/locations -c ug | diff test/ug.txt -
+# else
+# 	echo ">> WARNING: locdb tests do not work with address sanitizer (via python)"
+# endif
 
 .PHONY: test
 
