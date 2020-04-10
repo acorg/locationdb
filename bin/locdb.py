@@ -257,8 +257,9 @@ def try_geonames(look_for, orig_name=None, words=None):
 
 def find_report(look_for, like=False, orig=None):
     try:
+        # print(f"find_report look_for:\"{look_for}\"")
         for e in find(name=look_for, like=like, handle_replacement=True):
-            # pprint.pprint(entry, width=120)
+            # pprint.pprint(e, width=120)
             if e.get("replacement"):
                 print(f"""Replace:"{e['replacement']}" Look:"{look_for}" Loc:"{e.found}" {e.latitude} {e.longitude} Div:"{e.division}" "{e.country}" "{e.continent}" """)
             else:
