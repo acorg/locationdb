@@ -99,10 +99,10 @@ namespace acmacs::locationdb::inline v1
 
     struct LookupResult
     {
-        const std::string look_for;
+        std::string look_for;
         std::string replacement;
-        const std::string name;          // the same as normalized look_for or replacement
-        const std::string location_name; // location entry name
+        std::string name;          // the same as normalized look_for or replacement
+        std::string location_name; // location entry name
         std::string continent;
         const LocationEntry& location;
 

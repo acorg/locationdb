@@ -152,48 +152,6 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
         return fiws_result_t{};
     };
 
-    const auto find_in_with_prefix_separated = [find_in](const auto& container, std::string_view look_for) -> fiws_result_t {
-        for (const auto prefix : {"SOUTH"sv, "NORTH"sv, "WEST"sv, "EAST"sv, "CENTRAL"sv}) {
-            if (look_for.size() > prefix.size() && look_for.substr(0, prefix.size()) == prefix) {
-                const auto substituted = fmt::format("{} {}", prefix, look_for.substr(prefix.size()));
-                if (const auto found = find_in(container, substituted); !found.empty())
-                    return fiws_result_t{found, substituted};
-            }
-        }
-        return fiws_result_t{};
-    };
-
-    const auto find_in_with_prefix_removed = [find_in](const auto& container, std::string_view look_for) -> fiws_result_t {
-        for (const auto prefix : {"NL-"sv, "TURKEY-"sv}) {
-            if (look_for.size() > prefix.size() && look_for.substr(0, prefix.size()) == prefix) {
-                const auto substituted = look_for.substr(prefix.size());
-                if (const auto found = find_in(container, substituted); !found.empty())
-                    return fiws_result_t{found, substituted};
-            }
-        }
-        return fiws_result_t{};
-    };
-
-    const auto find_in_with_suffix_removed = [find_in](const auto& container, std::string_view look_for) -> fiws_result_t {
-        for (const auto suffix : {"_NRL"sv, ".NRL"sv, " NRL"sv, ".GRC"sv, ".GR"sv, " GR"sv, "_PT"sv, " PT"sv}) { // NRL - kazakhstan
-            if (look_for.size() > suffix.size() && look_for.substr(look_for.size() - suffix.size()) == suffix) {
-                const auto substituted = look_for.substr(0, look_for.size() - suffix.size());
-                if (const auto found = find_in(container, substituted); !found.empty())
-                    return fiws_result_t{found, substituted};
-            }
-        }
-        return fiws_result_t{};
-    };
-
-    const auto find_in_with_camel_case_separated = [find_in](const auto& container, std::string_view look_for) -> fiws_result_t {
-        if (const auto parts = acmacs::string::split_camel_case(look_for); parts.size() > 1 && parts.size() < look_for.size()) {
-            const auto substituted = ::string::upper(acmacs::string::join(" ", parts));
-            if (const auto found = find_in(container, substituted); !found.empty())
-                return fiws_result_t{found, substituted};
-        }
-        return fiws_result_t{};
-    };
-
     // ----------------------------------------------------------------------
 
     const auto make_result = [inc_continent, this](LookupResult&& result) {
@@ -202,6 +160,62 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
         if (result.replacement.empty() && result.look_for != result.name)
             result.replacement = result.name;
         return std::move(result);
+    };
+
+    const auto find_in_with_substs_replacements = [find_in, find_in_with_substs, make_result, this](std::string_view look_for, std::string_view orig_look_for) -> std::optional<LookupResult> {
+        if (const auto [found, substituted] = find_in_with_substs(mNames, look_for); !found.empty())
+            return make_result(LookupResult{.look_for{orig_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+
+        if (const auto [replacement_found, substituted] = find_in_with_substs(mReplacements, look_for); !replacement_found.empty()) {
+            if (const auto found = find_in(mNames, replacement_found); !found.empty())
+                return make_result(LookupResult{
+                    .look_for{orig_look_for}, .replacement{replacement_found}, .name{replacement_found}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+        }
+        return std::nullopt;
+    };
+
+    // ----------------------------------------------------------------------
+
+    const auto find_in_with_prefix_separated = [find_in_with_substs_replacements](std::string_view look_for) -> std::optional<LookupResult> {
+        for (const auto prefix : {"SOUTH"sv, "NORTH"sv, "WEST"sv, "EAST"sv, "CENTRAL"sv}) {
+            if (look_for.size() > prefix.size() && look_for.substr(0, prefix.size()) == prefix) {
+                const auto substituted = fmt::format("{} {}", prefix, look_for.substr(prefix.size()));
+                if (auto found = find_in_with_substs_replacements(substituted, look_for); found.has_value())
+                    return found;
+            }
+        }
+        return std::nullopt;
+    };
+
+    const auto find_in_with_prefix_removed = [find_in_with_substs_replacements](std::string_view look_for) -> std::optional<LookupResult> {
+        for (const auto prefix : {"NL-"sv, "TURKEY-"sv}) {
+            if (look_for.size() > prefix.size() && look_for.substr(0, prefix.size()) == prefix) {
+                const auto substituted = look_for.substr(prefix.size());
+                if (auto found = find_in_with_substs_replacements(substituted, look_for); found.has_value())
+                    return found;
+            }
+        }
+        return std::nullopt;
+    };
+
+    const auto find_in_with_suffix_removed = [find_in_with_substs_replacements](std::string_view look_for) -> std::optional<LookupResult> {
+        for (const auto suffix : {"_NRL"sv, ".NRL"sv, " NRL"sv, ".GRC"sv, ".GR"sv, " GR"sv, "_PT"sv, " PT"sv}) { // NRL - kazakhstan
+            if (look_for.size() > suffix.size() && look_for.substr(look_for.size() - suffix.size()) == suffix) {
+                const auto substituted = look_for.substr(0, look_for.size() - suffix.size());
+                if (auto found = find_in_with_substs_replacements(substituted, look_for); found.has_value())
+                    return found;
+            }
+        }
+        return std::nullopt;
+    };
+
+    const auto find_in_with_camel_case_separated = [find_in_with_substs_replacements](std::string_view look_for) -> std::optional<LookupResult> {
+        if (const auto parts = acmacs::string::split_camel_case(look_for); parts.size() > 1 && parts.size() < look_for.size()) {
+            const auto substituted = ::string::upper(acmacs::string::join(" ", parts));
+            if (auto found = find_in_with_substs_replacements(substituted, look_for); found.has_value())
+                return found;
+        }
+        return std::nullopt;
     };
 
     // ----------------------------------------------------------------------
@@ -218,26 +232,20 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
             return make_result(LookupResult{.look_for{name_to_look_for}, .name{abbr}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
     }
 
-    if (const auto [found, substituted] = find_in_with_substs(mNames, name_to_look_for); !found.empty())
-        return make_result(LookupResult{.look_for{name_to_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+    if (const auto res = find_in_with_substs_replacements(name_to_look_for, name_to_look_for); res.has_value())
+        return res;
 
-    if (const auto [replacement_found, substituted] = find_in_with_substs(mReplacements, name_to_look_for); !replacement_found.empty()) {
-        if (const auto found = find_in(mNames, replacement_found); !found.empty())
-            return make_result(LookupResult{
-                .look_for{name_to_look_for}, .replacement{replacement_found}, .name{replacement_found}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
-    }
+    if (const auto res = find_in_with_prefix_separated(name_to_look_for); res.has_value())
+        return res;
 
-    if (const auto [found, substituted] = find_in_with_prefix_separated(mNames, name_to_look_for); !found.empty())
-        return make_result(LookupResult{.look_for{name_to_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+    if (const auto res = find_in_with_prefix_removed(name_to_look_for); res.has_value())
+        return res;
 
-    if (const auto [found, substituted] = find_in_with_prefix_removed(mNames, name_to_look_for); !found.empty())
-        return make_result(LookupResult{.look_for{name_to_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+    if (const auto res = find_in_with_suffix_removed(name_to_look_for); res.has_value())
+        return res;
 
-    if (const auto [found, substituted] = find_in_with_suffix_removed(mNames, name_to_look_for); !found.empty())
-        return make_result(LookupResult{.look_for{name_to_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
-
-    if (const auto [found, substituted] = find_in_with_camel_case_separated(mNames, aName); !found.empty())
-        return make_result(LookupResult{.look_for{name_to_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+    if (const auto res = find_in_with_camel_case_separated(aName); res.has_value())
+        return res;
 
     return std::nullopt;
 
