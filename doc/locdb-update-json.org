@@ -1,0 +1,15 @@
+# Time-stamp: <2020-04-11 09:17:14 eu>
+* 
+{"C": "replacement", "existing": , "new": }
+
+* COMMENT ---- local vars
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+#+OPTIONS: toc:nil
+#+STARTUP: showall indent
+# ======================================================================
+### Local Variables:
+### eval: (add-hook 'before-save-hook 'time-stamp)
+### eval: (flyspell-mode)
+### End:
