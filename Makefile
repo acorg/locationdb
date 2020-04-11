@@ -34,7 +34,6 @@ LOCDB_LDLIBS = \
 
 LDLIBS = \
   $(AD_LIB)/$(call shared_lib_name,libacmacsbase,1,0) \
-  $(AD_LIB)/$(call shared_lib_name,liblocationdb,1,0) \
   $(XZ_LIBS) \
   $(CXX_LIBS)
 
@@ -73,7 +72,7 @@ $(LOCATION_DB_LIB): $(patsubst %.cc,$(BUILD)/%.o,$(LOCDB_SOURCES)) | $(DIST)
 
 $(DIST)/%: $(BUILD)/%.o | $(DIST) $(LOCATION_DB_LIB)
 	$(call echo_link_exe,$@)
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS) $(AD_RPATH)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LOCATION_DB_LIB) $(LDLIBS) $(AD_RPATH)
 
 # ======================================================================
 ### Local Variables:

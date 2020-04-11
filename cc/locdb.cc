@@ -164,12 +164,12 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
 
     const auto find_in_with_substs_replacements = [find_in, find_in_with_substs, make_result, this](std::string_view look_for, std::string_view orig_look_for) -> std::optional<LookupResult> {
         if (const auto [found, substituted] = find_in_with_substs(mNames, look_for); !found.empty())
-            return make_result(LookupResult{.look_for{orig_look_for}, .name{substituted}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+            return make_result(LookupResult{.look_for{std::string{orig_look_for}}, .name{substituted}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
 
         if (const auto [replacement_found, substituted] = find_in_with_substs(mReplacements, look_for); !replacement_found.empty()) {
             if (const auto found = find_in(mNames, replacement_found); !found.empty())
                 return make_result(LookupResult{
-                    .look_for{orig_look_for}, .replacement{replacement_found}, .name{replacement_found}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+                        .look_for{std::string{orig_look_for}}, .replacement{std::string{replacement_found}}, .name{std::string{replacement_found}}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
         }
         return std::nullopt;
     };
@@ -229,7 +229,7 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
     if (name_to_look_for[0] == '#') {
         const auto abbr = name_to_look_for.substr(1);
         if (const auto found = find_in(mCdcAbbreviations, abbr); !found.empty())
-            return make_result(LookupResult{.look_for{name_to_look_for}, .name{abbr}, .location_name{found}, .location = detail::find_indexed_by_name(mLocations, found)});
+            return make_result(LookupResult{.look_for{std::string{name_to_look_for}}, .name{std::string{abbr}}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
     }
 
     if (const auto res = find_in_with_substs_replacements(name_to_look_for, name_to_look_for); res.has_value())
@@ -269,7 +269,7 @@ acmacs::locationdb::v1::LookupResult acmacs::locationdb::v1::LocDb::find_cdc_abb
     if (aAbbreviation[0] == '#')
         aAbbreviation.remove_prefix(1);
     const std::string location_name = detail::find_indexed_by_name(mCdcAbbreviations, aAbbreviation);
-    return LookupResult{.look_for{aAbbreviation}, .name{aAbbreviation}, .location_name{location_name}, .location=detail::find_indexed_by_name(mLocations, location_name)};
+    return LookupResult{.look_for{std::string{aAbbreviation}}, .name{std::string{aAbbreviation}}, .location_name{location_name}, .location=detail::find_indexed_by_name(mLocations, location_name)};
 
 } // acmacs::locationdb::v1::LocDb::find_cdc_abbreviation
 
