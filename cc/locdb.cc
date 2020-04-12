@@ -275,25 +275,29 @@ acmacs::locationdb::v1::LookupResult acmacs::locationdb::v1::LocDb::find_cdc_abb
 
 // ----------------------------------------------------------------------
 
-std::string acmacs::locationdb::v1::LocDb::abbreviation(std::string_view aName) const
+std::string acmacs::locationdb::v1::LocDb::abbreviation(std::string_view name) const
 {
       // if it's in USA, use CDC abbreviation (if available)
       // if aName has multiple words, use first letters of words in upper case
       // otherwise use two letter of aName capitalized
+
+    using namespace std::string_view_literals;
     std::string abbreviation;
-    try {
-        const auto found = find_or_throw(aName);
-        if (found.country() == "UNITED STATES OF AMERICA")
-            abbreviation = mCdcAbbreviations.find_abbreviation_by_name(found.location_name);
+
+    const auto use_abbreviation_of = [&abbreviation](std::string_view to_abbr) {
+        abbreviation = ::string::first_letter_of_words(to_abbr);
+        if (abbreviation.size() == 1 && to_abbr.size() > 1)
+            abbreviation.push_back(static_cast<char>(tolower(to_abbr[1])));
+    };
+
+    if (const auto found = find(name, include_continent::no); found.has_value()) {
+        if (found->country() == "UNITED STATES OF AMERICA"sv)
+            abbreviation = mCdcAbbreviations.find_abbreviation_by_name(found->location_name);
         if (abbreviation.empty())
-            aName = found.name;
+            use_abbreviation_of(found->name);
     }
-    catch (LocationNotFound&) {
-    }
-    if (abbreviation.empty()) {
-        abbreviation = ::string::first_letter_of_words(aName);
-        if (abbreviation.size() == 1 && aName.size() > 1)
-            abbreviation.push_back(static_cast<char>(tolower(aName[1])));
+    else {
+        use_abbreviation_of(name);
     }
     return abbreviation;
 
