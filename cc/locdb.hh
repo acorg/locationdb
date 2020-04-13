@@ -106,10 +106,10 @@ namespace acmacs::locationdb::inline v1
         std::string continent;
         const LocationEntry& location;
 
-        Latitude latitude() const { return location.latitude(); }
-        Longitude longitude() const { return location.longitude(); }
-        std::string_view country() const { return location.country(); }
-        std::string_view division() const { return location.division(); }
+        Latitude latitude() const noexcept { return location.latitude(); }
+        Longitude longitude() const noexcept { return location.longitude(); }
+        std::string_view country() const noexcept { return location.country(); }
+        std::string_view division() const noexcept { return location.division(); }
     };
 
     // ----------------------------------------------------------------------
@@ -124,64 +124,52 @@ namespace acmacs::locationdb::inline v1
         void importFrom(std::string_view aFilename, locdb_suppress_error suppress_error, report_time timer = report_time::no);
         // void exportTo(std::string_view aFilename, bool aPretty, report_time timer = report_time::no) const;
 
-        bool empty() const { return mNames.empty(); }
-        operator bool() const { return !empty(); }
+        bool empty() const noexcept { return mNames.empty(); }
+        operator bool() const noexcept { return !empty(); }
 
         // If aName starts with # - it is cdc abbreviation
-        std::optional<LookupResult> find(std::string_view aName, include_continent inc_continent = include_continent::no) const;
-        LookupResult find_or_throw(std::string_view aName) const;
-        LookupResult find_cdc_abbreviation(std::string_view aAbbreviation) const;
+        std::optional<LookupResult> find(std::string_view aName, include_continent inc_continent = include_continent::no) const noexcept;
+        LookupResult find_or_throw(std::string_view aName) const; // throws LocationNotFound
+        LookupResult find_cdc_abbreviation(std::string_view aAbbreviation) const; // throws LocationNotFound
         std::string_view continent_of_country(std::string_view aCountry) const;
         std::string abbreviation(std::string_view aName) const;
 
-        std::string_view country(std::string_view aName, std::string_view for_not_found = {}) const
+        std::string_view country(std::string_view aName, std::string_view for_not_found = {}) const noexcept
         {
-            try {
-                return find_or_throw(aName).country();
-            }
-            catch (std::exception&) {
-                if (for_not_found.empty())
-                    throw;
+            if (const auto loc = find(aName, acmacs::locationdb::include_continent::no); loc.has_value())
+                return loc->country();
+            else
                 return for_not_found;
-            }
         }
 
-        std::string_view continent(std::string_view aName, std::string_view for_not_found = {}) const
+        std::string continent(std::string_view aName, std::string for_not_found = {}) const noexcept
         {
-            try {
-                return continent_of_country(find_or_throw(aName).country());
-            }
-            catch (std::exception&) {
-                if (for_not_found.empty())
-                    throw;
+            if (const auto loc = find(aName, acmacs::locationdb::include_continent::yes); loc.has_value())
+                return loc->continent;
+            else
                 return for_not_found;
-            }
         }
 
-        Latitude latitude(std::string_view aName, Latitude for_not_found = 360.0) const
+        Latitude latitude(std::string_view aName, Latitude for_not_found = 360.0) const noexcept
         {
-            try {
-                return find_or_throw(aName).latitude();
-            }
-            catch (std::exception&) {
+            if (const auto loc = find(aName, acmacs::locationdb::include_continent::no); loc.has_value())
+                return loc->latitude();
+            else
                 return for_not_found;
-            }
         }
 
-        Longitude longitude(std::string_view aName, Longitude for_not_found = 360.0) const
+        Longitude longitude(std::string_view aName, Longitude for_not_found = 360.0) const noexcept
         {
-            try {
-                return find_or_throw(aName).longitude();
-            }
-            catch (std::exception&) {
+            if (const auto loc = find(aName, acmacs::locationdb::include_continent::no); loc.has_value())
+                return loc->longitude();
+            else
                 return for_not_found;
-            }
         }
 
-        std::string stat() const;
+        std::string stat() const noexcept;
 
-        const auto& names() const { return mNames; }
-        const auto& replacements() const { return mReplacements; }
+        const auto& names() const noexcept { return mNames; }
+        const auto& replacements() const noexcept { return mReplacements; }
 
         // deprecated
         std::optional<typename Names::const_iterator> find_by_name_no_fixes(std::string_view aName) const;

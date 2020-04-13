@@ -118,7 +118,7 @@ void acmacs::locationdb::v1::LocDb::importFrom(std::string_view aFilename, locdb
 
 // ----------------------------------------------------------------------
 
-std::string acmacs::locationdb::v1::LocDb::stat() const
+std::string acmacs::locationdb::v1::LocDb::stat() const noexcept
 {
     return fmt::format("continents:{} countries:{} locations:{} names:{} cdc-abbr:{} replacements:{}",
                        mContinents.size(), mCountries.size(), mLocations.size(), mNames.size(), mCdcAbbreviations.size(), mReplacements.size());
@@ -127,7 +127,7 @@ std::string acmacs::locationdb::v1::LocDb::stat() const
 
 // ----------------------------------------------------------------------
 
-std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocDb::find(std::string_view aName, include_continent inc_continent) const
+std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocDb::find(std::string_view aName, include_continent inc_continent) const noexcept
 {
     using namespace std::string_view_literals;
 
@@ -268,7 +268,7 @@ acmacs::locationdb::v1::LookupResult acmacs::locationdb::v1::LocDb::find_cdc_abb
 {
     if (aAbbreviation[0] == '#')
         aAbbreviation.remove_prefix(1);
-    const std::string location_name = detail::find_indexed_by_name(mCdcAbbreviations, aAbbreviation);
+    const std::string location_name = detail::find_indexed_by_name(mCdcAbbreviations, aAbbreviation); // throws LocationNotFound
     return LookupResult{.look_for{std::string{aAbbreviation}}, .name{std::string{aAbbreviation}}, .location_name{location_name}, .location=detail::find_indexed_by_name(mLocations, location_name)};
 
 } // acmacs::locationdb::v1::LocDb::find_cdc_abbreviation
