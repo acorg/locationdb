@@ -1,6 +1,8 @@
-# Time-stamp: <2020-04-11 09:17:14 eu>
-* 
+# Time-stamp: <2020-04-14 12:00:15 eu>
+* locdb -e '[{}, {}]'
+{"C": "add", "name": , "country": , "division": , "lat": , "long": }
 {"C": "replacement", "existing": , "new": }
+{"C": "add_name", "existing": , "new_name": }
 
 * COMMENT ---- local vars
 :PROPERTIES:
