@@ -188,7 +188,7 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
     };
 
     const auto find_in_with_prefix_removed = [find_in_with_substs_replacements](std::string_view look_for) -> std::optional<LookupResult> {
-        for (const auto prefix : {"NL-"sv, "TURKEY-"sv}) {
+        for (const auto prefix : {"NL-"sv, "TURKEY-"sv, "FLU-"sv}) {
             if (look_for.size() > prefix.size() && look_for.substr(0, prefix.size()) == prefix) {
                 const auto substituted = look_for.substr(prefix.size());
                 if (auto found = find_in_with_substs_replacements(substituted, look_for); found.has_value())
