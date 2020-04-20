@@ -164,12 +164,16 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
 
     const auto find_in_with_substs_replacements = [find_in, find_in_with_substs, make_result, this](std::string_view look_for, std::string_view orig_look_for) -> std::optional<LookupResult> {
         if (const auto [found, substituted] = find_in_with_substs(mNames, look_for); !found.empty())
-            return make_result(LookupResult{.look_for{std::string{orig_look_for}}, .name{substituted}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
+            return make_result(
+                LookupResult{.look_for{std::string{orig_look_for}}, .name{substituted}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
 
         if (const auto [replacement_found, substituted] = find_in_with_substs(mReplacements, look_for); !replacement_found.empty()) {
             if (const auto found = find_in(mNames, replacement_found); !found.empty())
-                return make_result(LookupResult{
-                        .look_for{std::string{orig_look_for}}, .replacement{std::string{replacement_found}}, .name{std::string{replacement_found}}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
+                return make_result(LookupResult{.look_for{std::string{orig_look_for}},
+                                                .replacement{std::string{replacement_found}},
+                                                .name{std::string{replacement_found}},
+                                                .location_name{std::string{found}},
+                                                .location = detail::find_indexed_by_name(mLocations, found)});
         }
         return std::nullopt;
     };
@@ -227,26 +231,31 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
     const auto name_to_look_for_s = ::string::upper(aName);
     const std::string_view name_to_look_for{name_to_look_for_s};
 
-    if (name_to_look_for[0] == '#') {
-        const auto abbr = name_to_look_for.substr(1);
-        if (const auto found = find_in(mCdcAbbreviations, abbr); !found.empty())
-            return make_result(LookupResult{.look_for{std::string{name_to_look_for}}, .name{std::string{abbr}}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
+    try {
+        if (name_to_look_for[0] == '#') {
+            const auto abbr = name_to_look_for.substr(1);
+            if (const auto found = find_in(mCdcAbbreviations, abbr); !found.empty())
+                return make_result(
+                    LookupResult{.look_for{std::string{name_to_look_for}}, .name{std::string{abbr}}, .location_name{std::string{found}}, .location = detail::find_indexed_by_name(mLocations, found)});
+        }
+
+        if (const auto res = find_in_with_substs_replacements(name_to_look_for, name_to_look_for); res.has_value())
+            return res;
+
+        if (const auto res = find_in_with_prefix_separated(name_to_look_for); res.has_value())
+            return res;
+
+        if (const auto res = find_in_with_prefix_removed(name_to_look_for); res.has_value())
+            return res;
+
+        if (const auto res = find_in_with_suffix_removed(name_to_look_for); res.has_value())
+            return res;
+
+        if (const auto res = find_in_with_camel_case_separated(aName); res.has_value())
+            return res;
     }
-
-    if (const auto res = find_in_with_substs_replacements(name_to_look_for, name_to_look_for); res.has_value())
-        return res;
-
-    if (const auto res = find_in_with_prefix_separated(name_to_look_for); res.has_value())
-        return res;
-
-    if (const auto res = find_in_with_prefix_removed(name_to_look_for); res.has_value())
-        return res;
-
-    if (const auto res = find_in_with_suffix_removed(name_to_look_for); res.has_value())
-        return res;
-
-    if (const auto res = find_in_with_camel_case_separated(aName); res.has_value())
-        return res;
+    catch (LocationNotFound&) {
+    }
 
     return std::nullopt;
 
