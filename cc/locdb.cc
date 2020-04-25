@@ -215,7 +215,7 @@ std::optional<acmacs::locationdb::v1::LookupResult> acmacs::locationdb::v1::LocD
 
     const auto find_in_with_camel_case_separated = [find_in_with_substs_replacements](std::string_view look_for) -> std::optional<LookupResult> {
         if (const auto parts = acmacs::string::split_camel_case(look_for); parts.size() > 1 && parts.size() < look_for.size()) {
-            const auto substituted = ::string::upper(acmacs::string::join(" ", parts));
+            const auto substituted = ::string::upper(acmacs::string::join(acmacs::string::join_space, parts));
             // AD_DEBUG("find_in_with_camel_case_separated \"{}\"", substituted);
             if (auto found = find_in_with_substs_replacements(substituted, look_for); found.has_value())
                 return found;
