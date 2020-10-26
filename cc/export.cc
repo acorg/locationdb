@@ -31,10 +31,10 @@ using ContinentsHandler = json_reader::StringListHandler<LocDb>;
 class CountriesHandler : public HandlerBase
 {
  public:
-    inline CountriesHandler(LocDb& aLocDb, acmacs::locationdb::v1::Countries& aData)
+    CountriesHandler(LocDb& aLocDb, acmacs::locationdb::v1::Countries& aData)
         : HandlerBase(aLocDb), mData(aData), mStarted(false) {}
 
-    inline virtual HandlerBase* StartObject()
+    HandlerBase* StartObject() override
         {
             if (mStarted)
                 throw json_reader::Failure();
@@ -42,13 +42,13 @@ class CountriesHandler : public HandlerBase
             return nullptr;
         }
 
-    inline virtual HandlerBase* Key(const char* str, rapidjson::SizeType length)
+    HandlerBase* Key(const char* str, rapidjson::SizeType length) override
         {
             mKey.assign(str, length);
             return nullptr;
         }
 
-    inline virtual HandlerBase* Uint(unsigned u)
+    HandlerBase* Uint(unsigned u) override
         {
             if (mKey.empty())
                 throw json_reader::Failure();
@@ -68,10 +68,10 @@ class CountriesHandler : public HandlerBase
 class LocationsHandler : public HandlerBase
 {
  public:
-    inline LocationsHandler(LocDb& aLocDb, acmacs::locationdb::v1::Locations& aData)
+    LocationsHandler(LocDb& aLocDb, acmacs::locationdb::v1::Locations& aData)
         : HandlerBase(aLocDb), mData(aData), mStarted(false), mIndex(5) {}
 
-    inline virtual HandlerBase* StartObject()
+    HandlerBase* StartObject() override
         {
             if (mStarted)
                 throw json_reader::Failure();
@@ -79,7 +79,7 @@ class LocationsHandler : public HandlerBase
             return nullptr;
         }
 
-    inline virtual HandlerBase* StartArray()
+    HandlerBase* StartArray() override
         {
             if (mKey.empty() || mIndex != 5)
                 throw json_reader::Failure();
@@ -87,7 +87,7 @@ class LocationsHandler : public HandlerBase
             return nullptr;
         }
 
-    inline virtual HandlerBase* EndArray()
+    HandlerBase* EndArray() override
         {
             if (mKey.empty() || mIndex != 4)
                 throw json_reader::Failure();
@@ -96,13 +96,13 @@ class LocationsHandler : public HandlerBase
             return nullptr;
         }
 
-    inline virtual HandlerBase* Key(const char* str, rapidjson::SizeType length)
+    HandlerBase* Key(const char* str, rapidjson::SizeType length) override
         {
             mKey.assign(str, length);
             return nullptr;
         }
 
-    inline virtual HandlerBase* Double(double d)
+    HandlerBase* Double(double d) override
         {
             if (mKey.empty())
                 throw json_reader::Failure();
@@ -120,7 +120,7 @@ class LocationsHandler : public HandlerBase
             return nullptr;
         }
 
-    inline virtual HandlerBase* String(const char* str, rapidjson::SizeType length)
+    HandlerBase* String(const char* str, rapidjson::SizeType length) override
         {
             if (mKey.empty())
                 throw json_reader::Failure();
@@ -161,9 +161,9 @@ namespace acmacs::locationdb::inline v1
         static const std::vector<std::pair<std::string, Keys>> sKeys;
 
       public:
-        inline LocDbRootHandler(LocDb& aLocDb) : HandlerBase(aLocDb), mKey(Keys::Unknown) {}
+        LocDbRootHandler(LocDb& aLocDb) : HandlerBase(aLocDb), mKey(Keys::Unknown) {}
 
-        inline virtual HandlerBase* Key(const char* str, rapidjson::SizeType length)
+        HandlerBase* Key(const char* str, rapidjson::SizeType length) override
         {
             HandlerBase* result = nullptr;
             Keys new_key = Keys::Unknown;
@@ -205,7 +205,7 @@ namespace acmacs::locationdb::inline v1
             return result;
         }
 
-        inline virtual HandlerBase* String(const char* str, rapidjson::SizeType length)
+        HandlerBase* String(const char* str, rapidjson::SizeType length) override
         {
             HandlerBase* result = nullptr;
             switch (mKey) {
