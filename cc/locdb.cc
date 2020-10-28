@@ -4,7 +4,7 @@
 #include "acmacs-base/acmacsd.hh"
 #include "acmacs-base/string-split.hh"
 #include "acmacs-base/string-join.hh"
-#include "acmacs-base/debug.hh"
+#include "acmacs-base/log.hh"
 #include "acmacs-base/fmt.hh"
 
 #include "locationdb/locdb.hh"
