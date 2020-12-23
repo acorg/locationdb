@@ -44,11 +44,6 @@ install: install-headers $(TARGETS)
 	$(call install_all,$(AD_PACKAGE_NAME))
 	$(call install_file,data/locationdb.json.xz,$(AD_DATA))
 	$(call install_program,bin/locdb.py,$(AD_BIN)/locdb)
-	#$(call install_py_lib,$(LOCATION_DB_PY_LIB))
-	#$(call symbolic_link_wildcard,$(DIST)/ldb,$(AD_BIN))
-	#$(call symbolic_link,$(realpath data/locationdb.json.xz),$(AD_DATA))
-	#$(call symbolic_link,$(abspath bin)/locations,$(AD_BIN))
-	#$(call symbolic_link,$(abspath bin)/locdb.py,$(AD_BIN)/locdb)
 
 test: install
 	echo ">> WARNING: write locdb tests (without py)"
