@@ -1,0 +1,57 @@
+#! /usr/bin/env python3
+"""
+Fix replacements which contain prefecture name, e.g.
+GUIZHOU QIANNAN BUYEI AND MIAO DUYUN -> GUIZHOU DUYUN
+to match CNIC style of names that they use in gisaid
+"""
+
+import json, lzma, pprint, logging, argparse, traceback
+from pathlib import Path
+
+# ----------------------------------------------------------------------
+
+def main(args):
+    data = json.load(lzma.open(args.source))
+    to_update = {}
+    not_fixed = set()
+    for name, replacement in data["replacements"].items():
+        if name[0] > '\u4e00':
+            words = replacement.split()
+            if len(words) > 2:
+                if f"{words[0]} {words[1]}" in ["NEI MONGOL", "INNER MONGOLIA"]:
+                    gisaid_name = f"NEIMENGGU {words[-1]}"
+                elif len(words) > 5 and " ".join(words[-4:]) == "MIAO YAO AND DAI":
+                    gisaid_name = f"{words[0]} {words[-5]}"
+                elif len(words) > 4 and " ".join(words[-3:]) == "MIAO AND DONG":
+                    gisaid_name = f"{words[0]} {words[-4]}"
+                elif words[-1] in ["DONG", "MIAO"]:
+                    gisaid_name = f"{words[0]} {words[-2]}"
+                else:
+                    gisaid_name = f"{words[0]} {words[-1]}"
+                if gisaid_name in data["names"]:
+                    to_update[name] = gisaid_name
+                    # print(name, repr(replacement), repr(gisaid_name), gisaid_name in data["names"])
+                else:
+                    not_fixed.add(replacement)
+    # pprint.pprint(to_update)
+    print(f"Not fixed: {len(not_fixed)}")
+    pprint.pprint(not_fixed)
+    data["replacements"].update(to_update)
+    with lzma.open(args.target, mode="wt", preset=9|lzma.PRESET_EXTREME) as fd:
+        json.dump(data, fd, indent=1, ensure_ascii=False)
+            # if len(words) > 2 and f"{words[0]} {words[-1]}" in data["names"]:
+            #     print(name, repr(replacement), repr(f"{words[0]} {words[-1]}"))
+    # print(repr(args.source), args.target)
+
+# ======================================================================
+
+try:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('source', type=Path)
+    parser.add_argument('target', type=Path)
+    args = parser.parse_args()
+    exit_code = main(args)
+except Exception as err:
+    logging.error('{}\n{}'.format(err, traceback.format_exc()))
+    exit_code = 1
+exit(exit_code)
