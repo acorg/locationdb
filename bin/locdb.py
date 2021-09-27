@@ -145,7 +145,7 @@ def xfind(look_for, like):
                     for entry in find(name=words[-1], like=True, handle_replacement=True):
                         ewords = entry.name.split(" ")
                         if all(ww in ewords for ww in words):
-                            print(f"look-for:{look_for!r} name:{entry.name!r} location:{entry.found!r} {replacement}division:{entry.division!r} country:{entry.country!r} continent:{entry.continent!r} lat:{entry.latitude!r} long:{entry.longitude!r}")
+                            print(f"look-for:{look_for!r} name:{entry.name!r} location:{entry.found!r} {entry.replacement}division:{entry.division!r} country:{entry.country!r} continent:{entry.continent!r} lat:{entry.latitude!r} long:{entry.longitude!r}")
                             print(f"""WARNING: run to add replacement:\n{{"C": "replacement", "existing": "{entry.name}", "new": "{look_for}"}},""")
                             return True
                 except:
