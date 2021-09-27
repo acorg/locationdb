@@ -34,7 +34,7 @@ def write_json(filename, data, indent=None, sort_keys=False, backup=True, emacs_
         separators=[',', ':']
     else:
         separators=[',', ': ']
-    dump = json.dumps(data, separators=separators, indent=indent, sort_keys=sort_keys)
+    dump = json.dumps(data, separators=separators, indent=indent, sort_keys=sort_keys, ensure_ascii=False)
     if indent is not None and emacs_local_var and "_" not in data:
         dump = '{{{empty:<{indent_1}s}"_": "-*- js-indent-level: {indent} -*-",'.format(empty="", indent=indent, indent_1=indent-1) + dump[1:]
     write_text(filename, dump, backup=backup)
