@@ -69,19 +69,19 @@ def _get(feature, result_maker, args):
 
 def _lookup_chinese(name):
     if len(name) > 3:
-        province = _find_chinese_province(name)[0]
-        county = _find_chinese_county(name, province);
-        if county:
-            r = [{
-                "local_name": name,
-                "name": _make_chinese_name(province, county),
-                "province": _make_province_name(province),
-                "country": province["countryName"],
-                "latitude": county["lat"],
-                "longitude": county["lng"],
-                }]
-        else:
-            r = []
+        r = []
+        if provinces := _find_chinese_province(name):
+            province = provinces[0]
+            county = _find_chinese_county(name, province);
+            if county:
+                r = [{
+                    "local_name": name,
+                    "name": _make_chinese_name(province, county),
+                    "province": _make_province_name(province),
+                    "country": province["countryName"],
+                    "latitude": county["lat"],
+                    "longitude": county["lng"],
+                    }]
     else:
         def make(entry):
             province_name = _make_province_name(entry)
