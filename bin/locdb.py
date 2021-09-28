@@ -61,10 +61,11 @@ def main(args):
     elif args.to_eval:
         do_eval(json.loads(args.to_eval))
     else:
-        for look_for in args.look_for:
+        not_found = []
+        for loc_no, look_for in enumerate(args.look_for):
             look_for = look_for.upper()
-            if len(args.look_for) > 1:
-                print(f">>>> \"{look_for}\"")
+            # if len(args.look_for) > 1:
+            #     print(f">>>> \"{look_for}\"")
             try:
                 if args.cdc_abbreviation:
                     print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
@@ -90,14 +91,25 @@ def main(args):
                     print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
                     exit_code = 1
                 else:
-                    exit_code = xfind(look_for, like=args.like)
-                    if exit_code == 99 and "DOU" in look_for:
-                        exit_code = xfind(look_for.replace("DOU", "DU"), like=args.like)
-                        if exit_code != 99:
+                    try:
+                        exit_code = xfind(look_for, like=args.like)
+                    except LocationNotFound:
+                        if "DOU" in look_for:
+                            exit_code = xfind(look_for.replace("DOU", "DU"), like=args.like)
                             print(f"""{{"C": "replacement", "existing": , "new": "{look_for}"}}""")
+                        else:
+                            raise
                     print()
             except LocationNotFound as err:
-                print(f"ERROR: \"{look_for}\" NOT FOUND: {err}", file=sys.stderr)
+                not_found.append(look_for)
+            except UnicodeEncodeError as err:
+                print(f"> unicode error for item {loc_no}: {err}", file=sys.stderr)
+                try:
+                    print(f">   {look_for}", file=sys.stderr)
+                except:
+                    pass
+        if not_found:
+            print(f"> ERROR: not found {len(not_found)}\n{pprint.pformat(not_found)}", file=sys.stderr)
     return exit_code
 
 # ======================================================================
@@ -205,8 +217,7 @@ def xfind(look_for, like):
     if try_geonames(look_for=look_for):
         return 1
 
-    print(f"ERROR: NOT FOUND: \"{look_for}\"", file=sys.stderr)
-    return 99
+    raise LocationNotFound(look_for)
 
 # ======================================================================
 
@@ -223,7 +234,10 @@ def try_geonames(look_for, orig_name=None, words=None):
             if country == "CHINA":
                 if name_words[-1] in DISTRICT_SUFFIXES:
                     name = " ".join(name_words[:-1])
-                full_name = f"{division} {name}"
+                if division != name_words[0]:
+                    full_name = f"{division} {name}"
+                else:
+                    full_name = name
             else:
                 full_name = name
             return {
@@ -241,15 +255,15 @@ def try_geonames(look_for, orig_name=None, words=None):
     if not found:
         return False
     for found_exact in sorted((en for en in found if en["name"] == look_for), key=lambda en: en["country"]):
-        print(json.dumps(found_exact), ",")
+        print(json.dumps(found_exact, ensure_ascii=False), ",")
 
     last_country = None
     for found_rest in sorted((en for en in found if en["name"] != look_for), key=lambda en: en["country"] + en["name"]):
-        if last_country != found_rest["country"]:
-            last_country = found_rest["country"]
-            print(last_country)
+        # if last_country != found_rest["country"]:
+        #     last_country = found_rest["country"]
+        #     print(last_country)
         if not check_find(found_rest["name"]):
-            print(json.dumps(found_rest), ",")
+            print(json.dumps(found_rest, ensure_ascii=False), ",")
         print(f"""    {{"C": "replacement", "existing": "{found_rest["name"]}", "new": "{look_for}"}} ,""")
     return True
 
