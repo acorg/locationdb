@@ -82,56 +82,6 @@ def main(args):
                     print(f">   {look_for}", file=sys.stderr)
                 except:
                     pass
-
-        # not_found = []
-        # for loc_no, look_for in enumerate(args.look_for):
-        #     look_for = look_for.upper()
-        #     # if len(args.look_for) > 1:
-        #     #     print(f">>>> \"{look_for}\"")
-        #     try:
-        #         if args.cdc_abbreviation:
-        #             print(look_for, find_cdc_abbreviation(cdc_abbreviation=look_for))
-        #         elif args.cdc_abbreviation_for_name:
-        #             print(look_for, find_cdc_abbreviation_for_name(look_for))
-        #         elif args.country:
-        #             print(look_for, ": ", country(name=look_for), sep="")
-        #         elif args.continent:
-        #             print(look_for, ": ", continent(name=look_for), sep="")
-        #         elif args.geonames:
-        #             entries = list(geonames(name=look_for))
-        #             max_name = max((len(e["name"]) for e in entries), default=1)
-        #             max_country = max((len(sCountries.get(e["country"].upper(), e["country"])) for e in entries), default=1)
-        #             max_division = max((len(e["province"]) for e in entries), default=1)
-        #             def format_entry(entry):
-        #                 country = entry["country"].upper()
-        #                 country = sCountries.get(country, country)
-        #                 name = entry["name"].upper()
-        #                 division = entry["province"].upper()
-        #                 if country == "CHINA" and division not in name:
-        #                     name = f"{division} {name}"
-        #                 return "locdb --add {name:<{max_name}s} {country:<{max_country}s} {division:<{max_division}s} {lat:>6.2f} {long:>7.2f}".format(name=f"'{name}'", max_name=max_name + 2, country=f"'{country}'", max_country=max_country + 2, division=f"'{division}'", max_division=max_division + 2, lat=float(entry["latitude"]), long=float(entry["longitude"]))
-        #             print(look_for, "\n".join(format_entry(e) for e in entries), sep="\n")
-        #             exit_code = 1
-        #         else:
-        #             try:
-        #                 exit_code = xfind(look_for, like=args.like)
-        #             except LocationNotFound:
-        #                 if "DOU" in look_for:
-        #                     exit_code = xfind(look_for.replace("DOU", "DU"), like=args.like)
-        #                     print(f"""{{"C": "replacement", "existing": , "new": "{look_for}"}}""")
-        #                 else:
-        #                     raise
-        #             print()
-        #     except LocationNotFound as err:
-        #         not_found.append(look_for)
-        #     except UnicodeEncodeError as err:
-        #         print(f"> unicode error for item {loc_no}: {err}", file=sys.stderr)
-        #         try:
-        #             print(f">   {look_for}", file=sys.stderr)
-        #         except:
-        #             pass
-        # if not_found:
-        #     print(f"> ERROR: not found {len(not_found)}\n{pprint.pformat(not_found)}", file=sys.stderr)
     return exit_code
 
 # ======================================================================
