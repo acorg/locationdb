@@ -43,7 +43,6 @@ install: install-headers $(TARGETS)
 	$(call install_lib,$(LOCATION_DB_LIB))
 	$(call install_all,$(AD_PACKAGE_NAME))
 	$(call install_py_all)
-	$(call install_file,data/locationdb.json.xz,$(AD_DATA))
 	$(call install_program,bin/locdb.py,$(AD_BIN)/locdb)
 
 test: install

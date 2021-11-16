@@ -19,7 +19,7 @@
 #endif
 
 static std::unique_ptr<LocDb> sLocDb;
-static std::string sLocDbFilename = acmacs::acmacsd_root() + "/data/locationdb.json.xz";
+static std::string sLocDbFilename = acmacs::locdb_v2();
 static bool sVerbose = false;
 
 #pragma GCC diagnostic pop
