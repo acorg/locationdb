@@ -85,9 +85,9 @@ class LocationDb:
 
     def __init__(self):
         with timeit("Loading LocationDb"):
-            self.dbfile = Path(os.environ["ACMACS_LOCATIONDB"])
+            self.dbfile = Path(os.environ["LOCATIONDB_V2"])
             if not self.dbfile.exists():
-                raise RuntimeError("LocationDb file not found (ACMACS_LOCATIONDB={})".format(os.environ.get("ACMACS_LOCATIONDB")))
+                raise RuntimeError(f"LocationDb file not found (LOCATIONDB_V2={os.environ.get('LOCATIONDB_V2')})")
             self.data = read_json(self.dbfile)
             try:
                 del self.data["_"]
@@ -213,11 +213,8 @@ sLocationDb = None  # singleton
 def location_db():
     global sLocationDb
     if sLocationDb is None:
-        if not os.environ.get("ACMACS_LOCATIONDB"):
-            if os.environ.get("ACMACS_ROOT"):
-                locdb = os.environ["ACMACS_ROOT"] + "/modules/locationdb/data/locationdb.json.xz"
-                if Path(locdb).exists():
-                    os.environ["ACMACS_LOCATIONDB"] = locdb
+        if not os.environ.get("LOCATIONDB_V2"):
+            raise RuntimeError(f"LOCATIONDB_V2 not set (perhaps ${HOME}/acmacs-data/locationdb.json.xz)")
         try:
             sLocationDb = LocationDb()
         except Exception as err:

@@ -23,11 +23,11 @@ from acmacs_base import timeit, json
 # ----------------------------------------------------------------------
 
 def main(args):
-    if not os.environ.get("ACMACS_LOCATIONDB"):
-        os.environ["ACMACS_LOCATIONDB"] = str(Path(sys.argv[0]).resolve().parents[1].joinpath("data", "locationdb.json.xz"))
+    if not os.environ.get("LOCATIONDB_V2"):
+        raise RuntimeError(f"LOCATIONDB_V2 not set (perhaps ${HOME}/acmacs-data/locationdb.json.xz)")
     ldb = ldb_m.LocDb()
     with timeit("Reading locationdb"):
-        ldb.import_from(os.environ["ACMACS_LOCATIONDB"])
+        ldb.import_from(os.environ["LOCATIONDB_V2"])
     with timeit("Writing locationdb"):
         json.write_json(Path("/tmp/locdb.json.xz"), , indent=1, compact=False)
     # ldb._updated = True

@@ -31,8 +31,8 @@ DISTRICT_SUFFIXES = ["XIAN", "XIN", "QU", "SHI"] # county, district, city, XIN i
 
 def main(args):
     exit_code = 0
-    if not os.environ.get("ACMACS_LOCATIONDB"):
-        os.environ["ACMACS_LOCATIONDB"] = str(Path(sys.argv[0]).resolve().parents[1].joinpath("data", "locationdb.json.xz"))
+    if not os.environ.get("LOCATIONDB_V2"):
+        raise RuntimeError(f"LOCATIONDB_V2 not set (perhaps ${HOME}/acmacs-data/locationdb.json.xz)")
     if args.check:
         check()
     if args.fix:
