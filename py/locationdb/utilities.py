@@ -71,13 +71,15 @@ def write_text(filename, text, backup=True):
 # ----------------------------------------------------------------------
 
 def backup_file(filename):
+    backup_dir = filename.parent.joinpath(".backup")
+    backup_dir.mkdir(exist_ok=True)
     newname = filename
     suffixes = "".join(filename.suffixes)
-    prefix = str(filename)[:-len(suffixes)]
-    version = 1
+    prefix = filename.name[:-len(suffixes)]
+    version = ""
     while newname.exists():
-        newname = Path('{}.~{:03d}~{}'.format(prefix, version, suffixes))
-        version += 1
+        newname = backup_dir.joinpath(f"{prefix}.~{datetime.datetime.now():%Y-%m%d-%H%M%S}{version}~{suffixes}")
+        version = "-{version}a"
     if newname != filename:
         try:
             shutil.copyfile(str(filename), str(newname))
